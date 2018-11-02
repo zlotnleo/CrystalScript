@@ -25,8 +25,8 @@ b = 4
 a = 12
 "
       target = "\
-a = 3;
-b = 4;
+let a = 3;
+let b = 4;
 a = 12;
 "
       CrystalScript.convert(source).should eq target;

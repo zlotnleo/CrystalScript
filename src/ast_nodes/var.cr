@@ -1,6 +1,6 @@
 module CrystalScript
   class AST
-    def self.generate(node : Var)
+    def generate(node : Var)
       node.name
     end
   end
