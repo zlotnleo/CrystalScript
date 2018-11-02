@@ -9,11 +9,11 @@ describe CrystalScript do
 -2
 "
       target = "\
-1;
-2;
-3.1415;
-2.71828;
--2;
+new UInt8(\"1\");
+new UInt32(\"2\");
+new Float64(\"3.1415\");
+new Float32(\"2.71828\");
+new Int32(\"-2\");
 "
       CrystalScript.convert(source).should eq target;
     end
@@ -25,9 +25,9 @@ b = 4
 a = 12
 "
       target = "\
-let a = 3;
-let b = 4;
-a = 12;
+let a = new Int32(\"3\");
+let b = new Int32(\"4\");
+a = new Int32(\"12\");
 "
       CrystalScript.convert(source).should eq target;
     end

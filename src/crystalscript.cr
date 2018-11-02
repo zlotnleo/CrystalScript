@@ -1,4 +1,5 @@
 require "compiler/crystal/syntax"
+require "./types"
 require "./ast_nodes"
 
 module CrystalScript
@@ -7,3 +8,5 @@ module CrystalScript
     js_code = CrystalScript::AST.new.generate(ast)
   end
 end
+
+puts CrystalScript.convert("a = 3")
