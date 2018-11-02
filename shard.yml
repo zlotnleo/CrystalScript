@@ -1,0 +1,13 @@
+name: CrystalScript
+version: 0.1.0
+
+authors:
+  - zlotnleo <zlotnleo@gmail.com>
+
+targets:
+  CrystalScript:
+    main: src/CrystalScript.cr
+
+crystal: 0.26.1
+
+license: MIT
