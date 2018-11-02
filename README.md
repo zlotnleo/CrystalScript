@@ -1,4 +1,5 @@
 # CrystalScript
+[![Build Status](https://travis-ci.org/zlotnleo/CrystalScript.svg?branch=master)](https://travis-ci.org/zlotnleo/CrystalScript)
 
 TODO: Write a description here
 
