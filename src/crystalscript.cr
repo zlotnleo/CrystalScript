@@ -1,6 +1,8 @@
-# TODO: Write documentation for `CrystalScript`
-module CrystalScript
-  VERSION = "0.1.0"
+require "compiler/crystal/syntax"
+require "./ast_nodes"
 
-  # TODO: Put your code here
-end
+s = "3"
+ast = Crystal::Parser.parse(s)
+puts typeof(->CrystalScript::AST.generate(Crystal::ASTNode))
+result = CrystalScript::AST.generate(ast).to_s
+puts result
