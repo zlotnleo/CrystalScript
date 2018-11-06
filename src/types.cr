@@ -18,7 +18,7 @@ module CrystalScript
   end
 
   def self.get_primitive_js_class(class_name, kind = nil)
-    if class_name < Number
+    if class_name <= Number
       js_class_name = self.get_number_class(kind)
     elsif class_name == String
       js_class_name = "String"
