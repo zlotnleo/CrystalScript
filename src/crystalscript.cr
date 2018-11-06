@@ -1,5 +1,6 @@
 require "compiler/crystal/syntax"
 require "./types"
+require "./method_name"
 require "./ast_nodes"
 
 module CrystalScript
@@ -9,4 +10,4 @@ module CrystalScript
   end
 end
 
-puts CrystalScript.convert("a = 3")
+puts CrystalScript.convert("a = 3_u8 - 5_i16")
