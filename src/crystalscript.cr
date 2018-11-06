@@ -9,5 +9,3 @@ module CrystalScript
     js_code = CrystalScript::AST.new.generate(ast)
   end
 end
-
-puts CrystalScript.convert("a = 3_u8 - 5_i16")

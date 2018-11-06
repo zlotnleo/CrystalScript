@@ -1,0 +1,1 @@
+crystal run ./src/crystalscript.cr
