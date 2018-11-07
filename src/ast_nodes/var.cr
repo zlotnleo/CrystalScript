@@ -1,5 +1,5 @@
 module CrystalScript
-  class AST
+  class CodeGen
     def generate(node : Var)
       node.name
     end

@@ -1,5 +1,5 @@
 module CrystalScript
-  class AST
+  class CodeGen
     def generate(node : Assign)
       target = self.generate(node.target)
       value = self.generate(node.value)

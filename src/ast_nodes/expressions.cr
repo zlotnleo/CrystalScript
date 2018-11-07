@@ -1,5 +1,5 @@
 module CrystalScript
-  class AST
+  class CodeGen
     def generate(node : Expressions)
       String.build do |str|
         node.expressions.each do |expression|

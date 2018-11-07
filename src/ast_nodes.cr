@@ -2,7 +2,7 @@ require "./ast_nodes/*"
 
 module CrystalScript
   include Crystal
-  class AST
+  class CodeGen
     def initialize
       @local_variables_scope = [[] of String]
     end
