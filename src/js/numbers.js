@@ -9,6 +9,10 @@ class Crystal__Int32 {
         }
     }
 
+    toString() {
+        return String(this.value)
+    }
+
     __PLUS__(other) {
         if(other instanceof Crystal__Int32) {
             let tmp = this.value + other.value;

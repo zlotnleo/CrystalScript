@@ -1,3 +1,3 @@
 function puts(val) {
-    console.log(val)
+    console.log(String(val))
 }
