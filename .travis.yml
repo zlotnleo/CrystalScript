@@ -1,1 +1,3 @@
 language: crystal
+before_install:
+  - nvm install node
