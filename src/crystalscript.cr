@@ -7,7 +7,7 @@ module CrystalScript
   def self.convert(crystal_code : String)
     ast = Crystal::Parser.parse(crystal_code)
     js_code = ""
-    ["numbers"].each do |base_name|
+    ["numbers", "string"].each do |base_name|
       filename = __DIR__ + "/js_classes/" + base_name + ".js"
       js_code += File.read(filename)
     end
