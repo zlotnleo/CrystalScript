@@ -1,8 +1,5 @@
 module CrystalScript
   def self.convert_method_name(crystal_name : String, global)
-    global_replacements = [
-      {"puts", "console.log"},
-    ]
     substitutions = [
       {"+", "__PLUS__"},
       {"-", "__MINUS__"},
@@ -15,16 +12,6 @@ module CrystalScript
     ]
 
     name = crystal_name
-
-    if global
-      global_replacements.each do |str, replacement|
-        if name == str
-          name = replacement
-          break
-        end
-      end
-    end
-
     substitutions.each do |str, replacement|
       name = name.gsub(str, replacement)
     end
