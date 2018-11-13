@@ -9,6 +9,8 @@ module CrystalScript
       {">", "__GREATERTHAN__"},
       {"<", "__LESSTHAN__"},
       {"=", "__EQUAL__"},
+      {"&", "__AMPERSAND__"},
+      {"|", "__PIPE__"}
     ]
 
     name = crystal_name
