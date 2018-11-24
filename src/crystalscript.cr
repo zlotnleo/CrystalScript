@@ -1,6 +1,6 @@
 require "compiler/crystal/syntax"
-require "./types"
-require "./method_name"
+require "./js_helpers/types"
+require "./js_helpers/method_name"
 require "./ast_nodes"
 
 module CrystalScript
