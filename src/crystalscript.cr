@@ -9,5 +9,3 @@ module CrystalScript
     js_code += CrystalScript::CodeGen.new.generate(ast)
   end
 end
-
-puts(CrystalScript.include_js_sources())
