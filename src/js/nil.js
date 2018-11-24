@@ -1,0 +1,2 @@
+class Crystal__Nil {
+}

@@ -24,6 +24,8 @@ module CrystalScript
       js_class_name = "String"
     elsif class_name == Bool
       js_class_name = "Bool"
+    elsif class_name == Nil
+      js_class_name = "Nil"
     else
       raise NotImplementedError.new("Unknown primitive class #{class_name}")
     end
