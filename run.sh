@@ -1,1 +1,1 @@
-crystal run ./src/crystalscript.cr
+crystal run "$(dirname ${BASH_SOURCE[0]})"/src/crystalscript.cr
