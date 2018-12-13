@@ -15,6 +15,9 @@ TODO: Write usage instructions here
 
 TODO: Write development instructions here
 
+## Weird Thing
+On both travis and locally, the VERSION file is missing from the crystal's install location. The shell script "create_VERSION.sh" does that. This file is necessary when `require "compiler/crystal/**"` appears in code (which is does).
+
 ## Contributing
 
 1. Fork it (<https://github.com/zlotnleo/CrystalScript/fork>)
