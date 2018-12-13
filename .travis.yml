@@ -2,6 +2,4 @@ language: crystal
 before_install:
   - nvm install node
 before_script:
-  - sudo ./create_VERSION.sh
-script:
-  - sudo crystal spec
+  - ./create_VERSION.sh
