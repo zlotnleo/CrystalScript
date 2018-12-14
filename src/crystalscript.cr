@@ -10,13 +10,14 @@
 #   end
 # end
 
-require "compiler/crystal/**"
-module CrystalScript
-  ENV["CRYSTAL_PATH"]=`crystal env CRYSTAL_PATH`
+ENV["CRYSTAL_PATH"]=__DIR__+":"+`crystal env CRYSTAL_PATH`
 
+require "compiler/crystal/**"
+
+module CrystalScript
   class Compiler < Crystal::Compiler
     @no_codegen = true
-    @prelude = "./crs_prelude"
+    @prelude = "crs_prelude"
 
     def compile(sources, output_filename)
       result = super
