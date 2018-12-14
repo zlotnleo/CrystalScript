@@ -3,4 +3,4 @@ env: LLVM_VERSION=4.0
 before_install:
   - nvm install node
 before_script:
-  - ./create_VERSION.sh
+  - sudo ./create_VERSION.sh
