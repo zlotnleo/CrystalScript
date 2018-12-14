@@ -3,4 +3,6 @@ env: LLVM_VERSION=4.0
 before_install:
   - nvm install node
 before_script:
-  - ./create_VERSION.sh
+  - CRYSTAL_INSTALL_DIR="$(crystal env CRYSTAL_PATH |  awk -F: '{print $1}')/../"
+  - sudo crystal env CRYSTAL_VERSION > "$CRYSTAL_INSTALL_DIR/VERSION"
+  - chown $USER "$CRYSTAL_INSTALL_DIR/VERSION"
