@@ -1,7 +1,9 @@
 language: crystal
+env: LLVM_VERSION=4.0
 before_install:
   - nvm install node
-  - sudo apt-get install -y clang-6.0.1
+  - sudo apt-get -qq update
+  - sudo apt-get install -y llvm-${LLVM_VERSION}-dev libclang-${LLVM_VERSION}-dev clang-${LLVM_VERSION}
 before_script:
   - sudo ./create_VERSION.sh
 script:
