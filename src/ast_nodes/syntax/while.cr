@@ -3,7 +3,7 @@ module CrystalScript
     def generate(node : While)
       <<-WHILE
       while Crystal__conditional(#{generate node.cond}) {
-        #{generate node.body}
+      #{CrystalScript.indent(generate node.body)}
       }
       WHILE
     end

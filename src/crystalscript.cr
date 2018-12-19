@@ -12,6 +12,7 @@
 require "compiler/crystal/**"
 require "./ast_nodes"
 require "./js_helpers/*"
+require "./utils/*"
 
 module CrystalScript
   include Crystal
