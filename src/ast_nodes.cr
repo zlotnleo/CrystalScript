@@ -1,7 +1,6 @@
-require "./ast_nodes/*"
+require "./ast_nodes/**"
 
 module CrystalScript
-  include Crystal
   class CodeGen
     @local_variables_scope = [[] of String]
 

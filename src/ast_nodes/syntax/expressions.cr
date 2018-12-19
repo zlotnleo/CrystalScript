@@ -3,7 +3,8 @@ module CrystalScript
     def generate(node : Expressions)
       String.build do |str|
         node.expressions.each do |expression|
-          str << self.generate(expression) << ";\n"
+          code = generate(expression)
+          str << code << ";\n" unless code.blank?
         end
       end
     end
