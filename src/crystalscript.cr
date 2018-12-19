@@ -17,21 +17,36 @@ module CrystalScript
   include Crystal
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
+  class CodeGen
+    def generate(node : Annotation | Def | ClassDef | LibDef | FunDef)
+      #placeholder to pass semantic checking of prelude
+      return ""
+    end
+  end
+
   class Compiler < Crystal::Compiler
     @no_codegen = true
     @prelude = "crs_prelude"
 
     def compile(sources, output_filename)
-      result = super
+      begin
+        result = super
+      rescue e : TypeException
+        puts e
+        exit(1)
+      end
       ast = result.node
+      # puts ast
       CodeGen.new.generate(ast)
     end
   end
 end
 
 source = CrystalScript::Compiler::Source.new "", "\
-a = 3
-# puts a
+while true
+  puts \"Loop\"
+  break
+end
 "
 
 result = CrystalScript::Compiler.new.compile(source, "out.js")

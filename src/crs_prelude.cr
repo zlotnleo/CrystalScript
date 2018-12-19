@@ -1,5 +1,5 @@
-# require "empty"
+require "empty"
 
-# @[Primitive(:io)]
-# def puts(*objects) : Nil
-# end
+@[Primitive(:io)]
+def puts(*objects) : Nil
+end
