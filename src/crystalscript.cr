@@ -49,13 +49,7 @@ module CrystalScript
 end
 
 source = CrystalScript::Compiler::Source.new "", "\
-while true
-  puts <<-TEST
-        string that \
-      is inden-
-      ted
-    TEST
-end
+puts 3.class
 "
 
 result = CrystalScript::Compiler.new.compile(source, "out.js")

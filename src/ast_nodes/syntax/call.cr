@@ -6,13 +6,17 @@ module CrystalScript
       code = ""
       obj = node.obj
       if obj.is_a?(ASTNode)
-        code += self.generate(obj) + "."
+        code += generate(obj) + "."
       end
+
       code += CrystalScript.convert_method_name(node.name, node.global?) + "("
-      node.args[0...(node.args.size - 1)].each do |arg|
-        code += self.generate(arg) + ", "
-    end
-    code + self.generate(node.args[-1]) + ")"
+      unless node.args.empty?
+        node.args[0...(node.args.size - 1)].each do |arg|
+          code += generate(arg) + ", "
+        end
+        code += generate(node.args[-1])
+      end
+      code + ")"
     end
   end
 end
