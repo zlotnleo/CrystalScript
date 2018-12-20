@@ -19,9 +19,14 @@ module CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   class CodeGen
-    def generate(node : Annotation | Def | ClassDef | LibDef | FunDef)
+    def generate(node : Annotation | ClassDef | LibDef | FunDef)
       #placeholder to pass semantic checking of prelude
       return ""
+    end
+
+    def generate(node : Def)
+      # node.annotations : Hash(AnnotationType, Annotation)
+      ""
     end
   end
 
@@ -45,8 +50,11 @@ end
 
 source = CrystalScript::Compiler::Source.new "", "\
 while true
-  puts \"Loop\"
-  break
+  puts <<-TEST
+        string that \
+      is inden-
+      ted
+    TEST
 end
 "
 
