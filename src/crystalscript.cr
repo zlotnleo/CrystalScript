@@ -19,15 +19,43 @@ module CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   class CodeGen
-    def generate(node : Annotation | ClassDef | LibDef | FunDef)
-      #placeholder to pass semantic checking of prelude
-      return ""
-    end
+    # def generate(node : Annotation | ClassDef | LibDef | FunDef )
+    #   #placeholder to pass semantic checking of prelude
+    #   return ""
+    # end
 
-    def generate(node : Def)
+    # def generate(node : Def)
       # node.annotations : Hash(AnnotationType, Annotation)
-      ""
-    end
+      # if node.name != "puts"
+      #   puts <<-DEF
+      #     Method definition:
+      #       name: #{node.name}
+      #       free_vars: #{node.free_vars}
+      #       receiver: #{node.receiver}
+      #       args: #{node.args}
+      #       splat_index: #{node.splat_index}
+      #       double_splat: #{node.double_splat}
+      #       body: #{node.body}
+      #       block_arg: #{node.block_arg}
+      #       return_type: #{node.return_type}
+      #       yields: #{node.yields}
+      #       visibility: #{node.visibility}
+      #       owner: #{node.owner}
+      #       original_owner?: #{node.original_owner?}
+      #       vars: #{node.vars}
+      #       yield_vars: #{node.yield_vars}
+      #       previous: #{node.previous}
+      #       next: #{node.next}
+      #       special_vars: #{node.special_vars}
+      #       block_nest: #{node.block_nest}
+      #       raises?: #{node.raises?}
+      #       closure?: #{node.closure?}
+      #       self_closured?: #{node.self_closured?}
+      #       captured_block?: #{node.captured_block?}
+      #     DEF
+      #   end
+    #   ""
+    # end
   end
 
   class Compiler < Crystal::Compiler
@@ -37,20 +65,37 @@ module CrystalScript
     def compile(sources, output_filename)
       begin
         result = super
-      rescue e : TypeException
+      rescue e : TypeException | SyntaxException
         puts e
         exit(1)
       end
       ast = result.node
-      # puts ast
-      CodeGen.new.generate(ast)
+      puts ast
+      # puts CrystalScript.ast_to_s(ast)
+      # CodeGen.new.generate(ast)
     end
   end
 end
 
-source = CrystalScript::Compiler::Source.new "", "\
-puts 3.class
-"
+source = CrystalScript::Compiler::Source.new "source_filename.cr", <<-PROGRAM
+module MyModule
+  class Parent
+    def initialize(@name=\"Boaty McBoatFace\")
+    end
+  end
+end
+
+class MyModule::Child < MyModule::Parent
+  def get_one()
+    1
+  end
+
+  def get_one_explicit() : Int32 | MyModule::Parent
+    return 1
+  end
+end
+
+PROGRAM
 
 result = CrystalScript::Compiler.new.compile(source, "out.js")
-puts result
+# puts result
