@@ -78,22 +78,6 @@ module CrystalScript
 end
 
 source = CrystalScript::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-module MyModule
-  class Parent
-    def initialize(@name=\"Boaty McBoatFace\")
-    end
-  end
-end
-
-class MyModule::Child < MyModule::Parent
-  def get_one()
-    1
-  end
-
-  def get_one_explicit() : Int32 | MyModule::Parent
-    return 1
-  end
-end
 
 PROGRAM
 
