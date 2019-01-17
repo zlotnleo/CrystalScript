@@ -1,17 +1,5 @@
-# require "compiler/crystal/syntax"
-# require "./js_helpers/*"
-
-# module CrystalScript
-#   def self.convert(crystal_code : String)
-#     ast = Crystal::Parser.parse(crystal_code)
-#     js_code = include_js_sources
-#     js_code += CrystalScript::CodeGen.new.generate(ast)
-#   end
-# end
-
 require "compiler/crystal/**"
-require "./ast_nodes"
-require "./ast_nodes/**"
+require "./codegen"
 require "./js_helpers/*"
 require "./utils/*"
 
@@ -20,9 +8,16 @@ module CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   class CodeGen
-    def generate(node : Def | LibDef | FunDef )
-      #placeholder to pass semantic checking
+    def generate(node : LibDef | FunDef | ClassDef | ModuleDef)
+      #placeholder
       return ""
+    end
+
+    def generate(node : Def)
+      # Ignore primitive annotation
+      return "" if !(a = node.annotations).nil? && a[@program.primitive_annotation]
+
+      "to-be-defined(#{node.name})"
     end
 
     # def generate(node : Def)
@@ -72,9 +67,6 @@ module CrystalScript
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, output_filename)
 
-    program = result.program
-    ast = result.node
-
     # puts <<-PROGRAM
     # symbols: #{program.symbols}
     # global_vars: #{program.global_vars}
@@ -83,12 +75,14 @@ module CrystalScript
     # requires: #{program.requires}
     # PROGRAM
 
-    CodeGen.new.generate(result.node)
+    code_gen = CodeGen.new(result.program)
+    code_gen.generate(result.node)
   end
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-
+def test
+end
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")
