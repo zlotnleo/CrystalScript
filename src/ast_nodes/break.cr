@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : Break)
+    private def generate(node : Break)
       exp = node.exp
       if exp.nil?
         return "break"

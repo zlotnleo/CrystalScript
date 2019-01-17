@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : Annotation)
+    private def generate(node : Annotation)
       # Annotation *nodes* are ignored
       # They are present in the Def node
       ""

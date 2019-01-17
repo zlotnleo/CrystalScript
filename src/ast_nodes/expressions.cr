@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : Expressions)
+    private def generate(node : Expressions)
       code_a = node.expressions
         .map { |expression| generate(expression)}
         .select { |exp_code| !exp_code.blank? }

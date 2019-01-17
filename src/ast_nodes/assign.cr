@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : Assign)
+    private def generate(node : Assign)
       target = self.generate(node.target)
       value = self.generate(node.value)
       current_scope = @local_variables_scope[0]

@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : Call)
+    private def generate(node : Call)
       # TODO: named args
       # TODO: blocks
       code = ""

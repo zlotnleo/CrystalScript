@@ -15,7 +15,7 @@ module CrystalScript
 
     def generate(node : Def)
       # Ignore primitive annotation
-      return "" if !(a = node.annotations).nil? && a[@program.primitive_annotation]
+      return "" if (a = node.annotations) && a[@program.primitive_annotation]?
 
       "to-be-defined(#{node.name})"
     end
@@ -75,14 +75,14 @@ module CrystalScript
     # requires: #{program.requires}
     # PROGRAM
 
-    code_gen = CodeGen.new(result.program)
-    code_gen.generate(result.node)
+    code_gen = CodeGen.new(result.program, result.node)
+    code_gen.generate
   end
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-def test
-end
+a = 3
+b = 4 + 2 * a
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")

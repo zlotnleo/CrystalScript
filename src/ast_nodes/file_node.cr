@@ -1,6 +1,6 @@
 module CrystalScript
   class CodeGen
-    def generate(node : FileNode)
+    private def generate(node : FileNode)
       @local_variables_scope.unshift([] of String)
       code = <<-FILENODE
       {
