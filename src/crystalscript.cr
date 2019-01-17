@@ -8,7 +8,7 @@ module CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   class CodeGen
-    def generate(node : LibDef | FunDef | ClassDef | ModuleDef)
+    def generate(node : LibDef | FunDef | ClassDef)
       #placeholder
       return ""
     end
