@@ -8,7 +8,7 @@ module CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   class CodeGen
-    def generate(node : LibDef | FunDef | ClassDef)
+    def generate(node : LibDef | FunDef | ModuleDef | ClassDef)
       #placeholder
       return ""
     end
@@ -16,8 +16,7 @@ module CrystalScript
     def generate(node : Def)
       # Ignore primitive annotation
       return "" if (a = node.annotations) && a[@program.primitive_annotation]?
-
-      "to-be-defined(#{node.name})"
+      "to-be-defined(name: #{node.name}, owner: #{node.owner})"
     end
 
     # def generate(node : Def)
@@ -81,8 +80,66 @@ module CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-a = 3
-b = 4 + 2 * a
+# module LocGlob
+#   def self.f
+#     puts "outside MyModule"
+#   end
+# end
+
+# module MyModule
+#   module LocGlob
+#     def self.f
+#       puts "inside MyModule"
+#     end
+#   end
+
+#   def self.call_local
+#     LocGlob.f
+#   end
+
+#   def self.call_global
+#     ::LocGlob.f
+#   end
+# end
+
+# module CompletelyUnrelated
+#     module MyModule::Nested
+#         def self.some_func
+#             puts "called!"
+#         end
+
+#         def not_self_func
+#         end
+#     end
+# end
+
+# module M1::M2::M3::M4
+# end
+
+# class NonExistentModule::Class
+# end
+
+# module M1::AnotherModule
+# end
+
+# module M1::M2::YetAnotherModule
+# end
+
+module GenericModule(T)
+    module InsideGeneric
+        def self.func
+            puts "output"
+        end
+
+        def self.t
+            puts T
+        end
+    end
+    def self.func
+        puts T
+    end
+end
+
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")
