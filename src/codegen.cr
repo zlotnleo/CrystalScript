@@ -19,7 +19,7 @@ module CrystalScript
     end
 
     def generate
-      code = ""
+      code = "const Crystal_Program = class {};\n"
 
       # TODO: generate symbol table
 

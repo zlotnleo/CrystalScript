@@ -1,4 +1,4 @@
-require "empty"
+require "primitives"
 
 @[Primitive(:io)]
 def puts(*objects) : Nil
