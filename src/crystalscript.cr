@@ -77,70 +77,75 @@ module CrystalScript
     code_gen = CodeGen.new(result.program, result.node)
     code_gen.generate
   end
+
+  def self.from_file(filename, output_filename)
+    source = Crystal::Compiler::Source.new filename, File.read(filename)
+    compile(source, output_filename)
+  end
 end
 
-source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-# module LocGlob
-#   def self.f
-#     puts "outside MyModule"
-#   end
-# end
+# source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
+# # module LocGlob
+# #   def self.f
+# #     puts "outside MyModule"
+# #   end
+# # end
 
-# module MyModule
-#   module LocGlob
-#     def self.f
-#       puts "inside MyModule"
-#     end
-#   end
+# # module MyModule
+# #   module LocGlob
+# #     def self.f
+# #       puts "inside MyModule"
+# #     end
+# #   end
 
-#   def self.call_local
-#     LocGlob.f
-#   end
+# #   def self.call_local
+# #     LocGlob.f
+# #   end
 
-#   def self.call_global
-#     ::LocGlob.f
-#   end
-# end
+# #   def self.call_global
+# #     ::LocGlob.f
+# #   end
+# # end
 
-# module CompletelyUnrelated
-#     module MyModule::Nested
-#         def self.some_func
-#             puts "called!"
+# # module CompletelyUnrelated
+# #     module MyModule::Nested
+# #         def self.some_func
+# #             puts "called!"
+# #         end
+
+# #         def not_self_func
+# #         end
+# #     end
+# # end
+
+# # module M1::M2::M3::M4
+# # end
+
+# # class NonExistentModule::Class
+# # end
+
+# # module M1::AnotherModule
+# # end
+
+# # module M1::M2::YetAnotherModule
+# # end
+
+# module GenericModule(T)
+#     module InsideGeneric
+#         def self.func
+#             puts "output"
 #         end
 
-#         def not_self_func
+#         def self.t
+#             puts T
 #         end
+#     end
+#     def self.func
+#         puts T
 #     end
 # end
 
-# module M1::M2::M3::M4
-# end
+# PROGRAM
 
-# class NonExistentModule::Class
-# end
-
-# module M1::AnotherModule
-# end
-
-# module M1::M2::YetAnotherModule
-# end
-
-module GenericModule(T)
-    module InsideGeneric
-        def self.func
-            puts "output"
-        end
-
-        def self.t
-            puts T
-        end
-    end
-    def self.func
-        puts T
-    end
-end
-
-PROGRAM
-
-result = CrystalScript.compile(source, "out.js")
-puts result
+# result = CrystalScript.compile(source, "out.js")
+# puts result
