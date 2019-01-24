@@ -7,7 +7,14 @@ jobs: # a collection of jobs
     steps:
       - checkout
       - run: apt-get update
-      - run: apt-get install llvm-4.0 llvm-4.0-dev --yes
+      - run:
+          name: install LLVM
+          command: apt-get install llvm-4.0 llvm-4.0-dev --yes
+      - run:
+          name: install NodeJS
+          command: |
+            curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash -
+            apt-get install nodejs --yes
       - run: ./create_VERSION.sh
       - run:
           name: Install dependencies.
