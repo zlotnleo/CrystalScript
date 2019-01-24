@@ -1,0 +1,17 @@
+version: 2
+jobs: # a collection of jobs
+  build: 
+    working_directory: ~/CrystalScript
+    docker: # run build steps with docker
+      - image: crystallang/crystal:0.27.0 # primary docker container; all `steps` will run here.
+    steps:
+      - checkout
+      - run: apt-get update
+      - run: apt-get install llvm-4.0 llvm-4.0-dev --yes
+      - run: ./create_VERSION.sh
+      - run:
+          name: Install dependencies.
+          command: shards install
+      - run:
+          name: Run tests
+          command: crystal spec
