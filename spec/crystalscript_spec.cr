@@ -13,12 +13,31 @@ Tests = [
 #   end
 # end
 
+# describe CrystalScript do
+#   describe "#convert" do
+#     Tests.each do |description, filename|
+#       it description do
+#         run_test(filename)
+#       end
+#     end
+#    end
+#  end
+
 describe CrystalScript do
-  describe "#convert" do
-    Tests.each do |description, filename|
-      it description do
-        run_test(filename)
-      end
-    end
-   end
- end
+  it "needs to have some tests that actually test the code" do
+    cr_code = <<-CRYSTAL
+      a = 10
+      puts a.to_s + " apples"
+    CRYSTAL
+
+    js_code = <<-JS
+      let a = 10;
+      console.log(a + " apples");
+    JS
+
+    cr_output = `crystal eval \"#{cr_code.gsub("\"", "\\\"")}\"`
+    js_output = `node --eval \"#{js_code.gsub("\"", "\\\"")}\"`
+
+    cr_output.should eq js_output
+  end
+end
