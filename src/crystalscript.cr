@@ -1,34 +1,120 @@
-# require "compiler/crystal/syntax"
-# require "./js_helpers/*"
-# require "./ast_nodes"
-
-# module CrystalScript
-#   def self.convert(crystal_code : String)
-#     ast = Crystal::Parser.parse(crystal_code)
-#     js_code = include_js_sources
-#     js_code += CrystalScript::CodeGen.new.generate(ast)
-#   end
-# end
-
-ENV["CRYSTAL_PATH"]=__DIR__+":"+`crystal env CRYSTAL_PATH`
-
 require "compiler/crystal/**"
+require "./codegen"
+require "./js_helpers/*"
+require "./utils/*"
 
 module CrystalScript
-  class Compiler < Crystal::Compiler
-    @no_codegen = true
-    @prelude = "crs_prelude"
+  include Crystal
+  ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
-    def compile(sources, output_filename)
-      result = super
-      ast = result.node
+  class CodeGen
+    def generate(node : ModuleDef | ClassDef)
+      generate(node.body)
     end
+
+    def generate(node : Path)
+      "(Path #{node.names})"
+    end
+  end
+
+  def self.compile(sources, output_filename)
+    compiler = Crystal::Compiler.new
+    compiler.no_codegen = true
+    compiler.prelude = "crs_prelude"
+    result = compiler.compile(sources, output_filename)
+
+    # puts <<-PROGRAM
+    # symbols: #{program.symbols}
+    # global_vars: #{program.global_vars}
+    # file_modules: #{program.file_modules}
+    # vars: #{program.vars}
+    # requires: #{program.requires}
+    # PROGRAM
+
+    code_gen = CodeGen.new(result.program, result.node)
+    code_gen.generate
+  end
+
+  def self.from_file(filename, output_filename)
+    source = Crystal::Compiler::Source.new filename, File.read(filename)
+    compile(source, output_filename)
   end
 end
 
-source = CrystalScript::Compiler::Source.new "", "\
-a = 3
-puts a
-"
+source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
+# class Outer
+#   class Inner1
+#     def func
+#       puts "inner 1"
+#     end
+#   end
+# end
 
-CrystalScript::Compiler.new.compile(source, "out.js")
+# class Outer::Inner2
+#   def func
+#     puts "inner2"
+#   end
+# end
+
+# def Outer.func
+#   puts "outer"
+# end
+
+# class Outer
+#   def self.self_func
+#     puts "also outer"
+#   end
+# end
+
+# class Outer::Inner3 end
+
+# class Outer
+#   def Inner3.func
+#     puts "inner3"
+#   end
+# end
+
+# module MyModule
+#   def self.module_self_method
+#   end
+
+#   def module_included_method
+#   end
+# end
+
+# class Test
+#   @@val = f
+#   @@val = 4
+
+#   def self.f
+#     this is never compiled
+#     @@val
+#   end
+
+#   def self.val
+#     @@val
+#   end
+# end
+
+# puts Test.val
+
+module MyModule
+  def f1
+  end
+end
+
+class MyClass
+  # include MyModule
+  def f2
+  end
+end
+
+class MyChildClass < MyClass
+  def f3
+  end
+end
+
+PROGRAM
+
+result = CrystalScript.compile(source, "out.js")
+puts result

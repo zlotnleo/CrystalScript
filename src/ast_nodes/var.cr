@@ -1,7 +1,5 @@
-module CrystalScript
-  class CodeGen
-    def generate(node : Var)
-      node.name
-    end
+class CrystalScript::CodeGen
+  private def generate(node : Var)
+    node.name
   end
 end
