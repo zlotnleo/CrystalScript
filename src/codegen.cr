@@ -59,6 +59,10 @@ module CrystalScript
       code
     end
 
+    private def generate(node : ExpandableNode)
+      raise ::Exception.new("The node #{node.class} should be expanded before code genration!")
+    end
+
     private def generate(node : ASTNode)
       raise NotImplementedError.new("Unsupported AST node #{node.class}")
     end
