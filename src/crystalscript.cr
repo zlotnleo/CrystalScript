@@ -98,20 +98,24 @@ source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
 
 # puts Test.val
 
-module MyModule
-  def f1
-  end
-end
+# module MyModule
+#   def f1
+#   end
+# end
 
-class MyClass
-  # include MyModule
-  def f2
-  end
-end
+# class MyClass
+#   # include MyModule
+#   def f2
+#   end
+# end
 
-class MyChildClass < MyClass
-  def f3
-  end
+# class MyChildClass < MyClass
+#   def f3
+#   end
+# end
+
+def some_method(x, y = 1, z = 3)
+  puts "Hello"
 end
 
 PROGRAM
