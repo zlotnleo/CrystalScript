@@ -114,9 +114,16 @@ source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
 #   end
 # end
 
-def some_method(x, y = 1, z = 3)
-  puts "Hello"
-end
+# def some_method(x, y = 1, z = 3)
+#   puts "Hello"
+# end
+
+a = "Hello"
+puts a
+b = 23
+puts b
+a = b + 1
+puts a
 
 PROGRAM
 

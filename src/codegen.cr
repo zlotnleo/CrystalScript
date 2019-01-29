@@ -1,4 +1,5 @@
 require "./ast_nodes/**"
+require "./js_helpers/**"
 
 module CrystalScript
   def self.global_class
@@ -52,8 +53,7 @@ module CrystalScript
         # defs: #{nt.defs}
       end
 
-      # TODO: include JS sources for Crystal primitives
-      # Note: the step above has already declared classes from prelude
+      code += CrystalScript.include_js_sources
 
       code += generate(@node)
       code
