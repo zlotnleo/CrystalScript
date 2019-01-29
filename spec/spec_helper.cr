@@ -1,18 +1,18 @@
 require "spec"
 require "../src/crystalscript"
 
-def with_temp(name, &block)
-  begin
-    Dir.mkdir_p(__DIR__ + "/" + name)
-    yield
-    Dir.rmdir(__DIR__ + "/" + name)
-  rescue e : Errno
-    STDERR.puts e.to_s
-  end
-end
+# def with_temp(name, &block)
+#   begin
+#     Dir.mkdir_p(__DIR__ + "/" + name)
+#     yield
+#     Dir.rmdir(__DIR__ + "/" + name)
+#   rescue e : Errno
+#     STDERR.puts e.to_s
+#   end
+# end
 
-class Timeout < Exception
-end
+# class Timeout < Exception
+# end
 
 # def wait_or_timeout(proc, time)
 #   d = delay(time) do
@@ -39,7 +39,6 @@ end
 
 def run_test(filename)
   crystal_in_path = __DIR__ + "/input/" + filename
-  base_name = File.basename(crystal_in_path, ".cr")
 
   crystal_out = File.tempfile("cr_out")
 
@@ -48,6 +47,8 @@ def run_test(filename)
 
   js_in = File.tempfile("js_in")
   js_in << CrystalScript.from_file(crystal_in_path, "irrelevant")
+
+  js_in.close # This (or .rewind) is necessary 😧
 
   js_out = File.tempfile("js_out")
 
