@@ -1,1 +1,1 @@
-crystal run "$(dirname ${BASH_SOURCE[0]})"/src/crystalscript.cr
+CC=$($LLVM_CONFIG --prefix)/bin/clang crystal run "$(dirname ${BASH_SOURCE[0]})"/src/crystalscript.cr
