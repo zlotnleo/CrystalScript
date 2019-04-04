@@ -23,14 +23,6 @@ module CrystalScript
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, output_filename)
 
-    # puts <<-PROGRAM
-    # symbols: #{program.symbols}
-    # global_vars: #{program.global_vars}
-    # file_modules: #{program.file_modules}
-    # vars: #{program.vars}
-    # requires: #{program.requires}
-    # PROGRAM
-
     code_gen = CodeGen.new(result.program, result.node)
     code_gen.generate
   end
@@ -42,89 +34,48 @@ module CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-# class Outer
-#   class Inner1
-#     def func
-#       puts "inner 1"
-#     end
-#   end
-# end
+module Action
+    module Move
+        def move()
+            puts "move"
+        end
+    end
 
-# class Outer::Inner2
-#   def func
-#     puts "inner2"
-#   end
-# end
+    module TakeOff
+        def takeoff()
+            puts "takeoff"
+        end
+    end
+end
 
-# def Outer.func
-#   puts "outer"
-# end
+abstract class Vehicle
+    include Action::Move
+    abstract def ready
+    def describe
+        "I'm a vehicle"
+    end
+end
 
-# class Outer
-#   def self.self_func
-#     puts "also outer"
-#   end
-# end
+class Plane < Vehicle
+    include Action::TakeOff
 
-# class Outer::Inner3 end
+    # property boarding_complete = false
+    @boarding_complete = false
+    def boarding_complete
+      @boarding_complete
+    end
+    def boarding_complete=(boarding_complete)
+      @boarding_complete = boarding_complete
+    end
 
-# class Outer
-#   def Inner3.func
-#     puts "inner3"
-#   end
-# end
+    def ready
+        boarding_complete
+    end
 
-# module MyModule
-#   def self.module_self_method
-#   end
-
-#   def module_included_method
-#   end
-# end
-
-# class Test
-#   @@val = f
-#   @@val = 4
-
-#   def self.f
-#     this is never compiled
-#     @@val
-#   end
-
-#   def self.val
-#     @@val
-#   end
-# end
-
-# puts Test.val
-
-# module MyModule
-#   def f1
-#   end
-# end
-
-# class MyClass
-#   # include MyModule
-#   def f2
-#   end
-# end
-
-# class MyChildClass < MyClass
-#   def f3
-#   end
-# end
-
-# def some_method(x, y = 1, z = 3)
-#   puts "Hello"
-# end
-
-a = "Hello"
-puts a
-b = 23
-puts b
-a = b + 1
-puts a
-
+    def describe
+        "I'm a plane"
+    end
+end
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")

@@ -1,5 +1,6 @@
 require "./ast_nodes/**"
 require "./js_helpers/**"
+require "./codegen/**"
 
 module CrystalScript
   def self.global_class
@@ -29,33 +30,47 @@ module CrystalScript
 
       # TODO: generate symbol table
 
+      # program = result.program
+      # puts <<-PROGRAM
+      # symbols: #{program.symbols}
+
+      # global_vars: #{program.global_vars}
+
+      # vars: #{program.vars} : #{program.vars.class}
+
+      # requires: #{program.requires}
+
+      # file_modules: #{program.file_modules} : #{program.file_modules.class}
+
+      # PROGRAM
+
       @ntv.accept(@node)
       code += declare_named_types
 
-      @ntv.traverse_tree do |named_type|
-        nt = named_type
+      # @ntv.traverse_tree do |named_type|
+      #   nt = named_type
 
-        begin
-          including_types = nt.including_types
-        rescue
-        end
+      #   begin
+      #     including_types = nt.including_types
+      #   rescue
+      #   end
 
-        begin
-          direct_subclasses = nt.subclasses
-        rescue
-        end
+      #   begin
+      #     direct_subclasses = nt.subclasses
+      #   rescue
+      #   end
 
-        puts <<-NAMED_INFO
-        "#{nt.name}:
-            including_types: #{including_types}
-            subclasses: #{direct_subclasses}
-        NAMED_INFO
-        # defs: #{nt.defs}
-      end
+      #   puts <<-NAMED_INFO
+      #   "#{nt.name}:
+      #       including_types: #{including_types}
+      #       subclasses: #{direct_subclasses}
+      #   NAMED_INFO
+      #   # defs: #{nt.defs}
+      # end
 
-      code += CrystalScript.include_js_sources
+      # code += CrystalScript.include_js_sources
 
-      code += generate(@node)
+      # code += generate(@node)
       code
     end
 
