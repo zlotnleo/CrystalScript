@@ -1,5 +1,5 @@
 class CrystalScript::CodeGen
-  def declare_named_types
+  def set_named_types_prototypes
     String.build do |str|
       @ntv.traverse_tree do |named_type|
         case named_type
@@ -12,14 +12,22 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          str << js_name << " = function() {\n" << "  init_class_vars();\n"
-          unless js_superclass.nil?
-            str << "  " << js_superclass << ".call(this);\n"
+          str << "set_custom_class_name(" << js_name << ", '" << named_type.full_name << "');\n"
+
+          str << js_name << ".prototype = Object.assign("
+          str << "Object.create("
+          if js_superclass.nil?
+            str << "null"
+          else
+            str << js_superclass + ".prototype"
           end
+          str << ")"
           included_modules.each do |mod|
-            str << "  " << CodeGen.to_js_name(mod) << ".call(this);\n"
+            str  << ", " << CodeGen.to_js_name(mod) << ".prototype"
           end
-          str << "};\n"
+          str << ");\n"
+
+          str << js_name << ".prototype.constructor = " << js_name << ";\n"
         else
           # TODO!
           # str << "const Crystal_Program." << named_type.to_s.gsub("::", ".")

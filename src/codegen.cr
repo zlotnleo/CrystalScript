@@ -45,6 +45,7 @@ module CrystalScript
 
       @ntv.accept(@node)
       code += declare_named_types
+      code += set_named_types_prototypes
 
       # @ntv.traverse_tree do |named_type|
       #   nt = named_type
