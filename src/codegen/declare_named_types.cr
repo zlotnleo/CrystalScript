@@ -3,7 +3,9 @@ class CrystalScript::CodeGen
     String.build do |str|
       @ntv.traverse_tree do |named_type|
         case named_type
-        when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
+        # when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
+        when NamedType
+          # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
           js_name = CodeGen.to_js_name(named_type)
           js_superclass = CodeGen.to_js_name(named_type.superclass)
           included_modules = named_type.parents.dup

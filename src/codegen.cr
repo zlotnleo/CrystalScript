@@ -14,18 +14,18 @@ module CrystalScript
     @ntv = NamedTypeVisitor.new
 
     def initialize(@program, @node)
-      @program.file_modules.each do |filename, mod|
-        info = <<-INFO
-          def_instances: #{mod.def_instances}
-          vars: #{mod.vars}
-        INFO
-        puts "#{filename}\n#{info}"
-      end
-      puts "\n\n"
+      # @program.file_modules.each do |filename, mod|
+      #   info = <<-INFO
+      #     def_instances: #{mod.def_instances}
+      #     vars: #{mod.vars}
+      #   INFO
+      #   puts "#{filename}\n#{info}"
+      # end
+      # puts "\n\n"
     end
 
     def generate
-      code = "const #{CrystalScript.global_class} = class {};\n"
+      code = "const #{CrystalScript.global_class} = Object.create(null);\n"
 
       # TODO: generate symbol table
 
