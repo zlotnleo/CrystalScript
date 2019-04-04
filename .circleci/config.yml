@@ -13,7 +13,7 @@ jobs: # a collection of jobs
       - run:
           name: install NodeJS
           command: |
-            apt-get install curl
+            apt-get install curl --yes
             curl -sL https://deb.nodesource.com/setup_11.x | bash -
             apt-get install nodejs --yes
       - run: ./create_VERSION.sh
