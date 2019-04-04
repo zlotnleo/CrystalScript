@@ -1,4 +1,3 @@
-require "./ast_nodes/**"
 require "./js_helpers/**"
 require "./codegen/**"
 

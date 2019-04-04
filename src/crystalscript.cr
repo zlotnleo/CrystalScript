@@ -1,6 +1,5 @@
 require "compiler/crystal/**"
 require "./codegen"
-require "./js_helpers/*"
 require "./utils/*"
 
 module CrystalScript

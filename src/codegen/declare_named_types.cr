@@ -5,7 +5,6 @@ class CrystalScript::CodeGen
         case named_type
         when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
           js_name = CodeGen.to_js_name(named_type)
-          puts js_name
           js_superclass = CodeGen.to_js_name(named_type.superclass)
           included_modules = named_type.parents.dup
           included_modules = [] of Crystal::Type if included_modules.nil?
