@@ -3,6 +3,8 @@ class CrystalScript::CodeGen
     String.build do |str|
       @ntv.traverse_tree do |named_type|
         case named_type
+        when FileModule
+          # TODO. This case is used to avoid handling FileModule as other NamedType's
         # when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
