@@ -14,9 +14,9 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          str << js_name << " = function() {\n" # << "  init_class_vars();\n"
+          str << js_name << " = function() {\n"
           if named_type.full_name == "Object"
-            str << "  this.__class_vars__ = Object.create(null);\n"
+            str << "  this.$class_vars = Object.create(null);\n"
           end
           unless js_superclass.nil?
             str << "  " << js_superclass << ".call(this);\n"
