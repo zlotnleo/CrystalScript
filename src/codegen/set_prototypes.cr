@@ -14,7 +14,7 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          str << "set_custom_class_name(" << js_name << ", '" << named_type.full_name << "');\n"
+          str << "Object.defineProperty(" << js_name << ".prototype.constructor, 'name', {value: '" << named_type.full_name << "'});\n"
 
           str << js_name << ".prototype = Object.assign("
           str << "Object.create("
