@@ -14,8 +14,10 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
+          # Set name
           str << "Object.defineProperty(" << js_name << ".prototype.constructor, 'name', {value: '" << named_type.full_name << "'});\n"
 
+          # Set superclass and add mixin methods
           str << js_name << ".prototype = Object.assign("
           str << "Object.create("
           if js_superclass.nil?
@@ -29,6 +31,23 @@ class CrystalScript::CodeGen
           end
           str << ");\n"
 
+          # Set list of included modules
+          str << js_name << ".prototype.$included_modules = "
+          if js_superclass.nil?
+            str << "[]"
+          else
+            str << js_superclass << ".prototype.$included_modules"
+          end
+          unless included_modules.empty?
+            str << ".concat(["
+            included_modules[0...-1].each do |mod|
+              str << CodeGen.to_js_name(mod) << ", "
+            end
+            str << CodeGen.to_js_name(included_modules[-1]) << "])"
+          end
+          str << ";\n"
+
+          # Assign constructor function
           str << js_name << ".prototype.constructor = " << js_name << ";\n"
         else
           # TODO!
