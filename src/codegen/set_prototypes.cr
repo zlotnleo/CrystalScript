@@ -1,7 +1,7 @@
 class CrystalScript::CodeGen
   def set_named_types_prototypes
     String.build do |str|
-      @ntv.traverse_tree do |named_type|
+      @ntv.in_namespace_order do |named_type|
         case named_type
         when FileModule
           # TODO. This case is used to avoid handling FileModule as other NamedType's
