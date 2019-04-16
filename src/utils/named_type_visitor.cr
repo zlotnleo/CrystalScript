@@ -2,8 +2,8 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
   @types = [] of Crystal::NamedType
 
   def visit(node : ModuleDef | ClassDef)
-    # Do not allow duplicates
-    @types << node.resolved_type if @types.find(&.== node.resolved_type).nil?
+    t = deinstanciate(node.resolved_type)
+    @types << t if @types.find(&.== t).nil?
     node.accept_children(self)
   end
 
@@ -22,6 +22,17 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
     getter :type
     def initialize(@type : NamedType)
     end
+    def to_s(io)
+      io << "Vertex(#{type})"
+    end
+  end
+
+  private def deinstanciate(t : Crystal::GenericInstanceType)
+    t.generic_type
+  end
+
+  private def deinstanciate(t : Crystal::Type)
+    t
   end
 
   private def toposort(vertices, mapping)
@@ -40,7 +51,9 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
       parents = [] of Crystal::NamedType
     end
     parents.each do |p_type|
+      p_type = deinstanciate(p_type)
       p_vertex = mapping[p_type]
+
       unless p_vertex.visited?
         toposort_visit(p_vertex, order, mapping)
       end
