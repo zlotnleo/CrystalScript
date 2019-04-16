@@ -1,7 +1,7 @@
 class CrystalScript::CodeGen
   def set_named_types_prototypes
     String.build do |str|
-      @ntv.in_namespace_order do |named_type|
+      @ntv.in_subclass_mixin_order do |named_type|
         case named_type
         when FileModule
           # TODO. This case is used to avoid handling FileModule as other NamedType's
@@ -31,22 +31,21 @@ class CrystalScript::CodeGen
           end
           str << ");\n"
 
-          # WRONG ORDER! TODO: Sort by module inclusion first!
-          # # Set list of included modules
-          # str << js_name << ".prototype.$included_modules = "
-          # if js_superclass.nil?
-          #   str << "[]"
-          # else
-          #   str << js_superclass << ".prototype.$included_modules"
-          # end
-          # unless included_modules.empty?
-          #   str << ".concat(["
-          #   included_modules[0...-1].each do |mod|
-          #     str << CodeGen.to_js_name(mod) << ", "
-          #   end
-          #   str << CodeGen.to_js_name(included_modules[-1]) << "])"
-          # end
-          # str << ";\n"
+          # Set list of included modules
+          str << js_name << ".prototype.$included_modules = "
+          if js_superclass.nil?
+            str << "[]"
+          else
+            str << js_superclass << ".prototype.$included_modules"
+          end
+          unless included_modules.empty?
+            str << ".concat(["
+            included_modules[0...-1].each do |mod|
+              str << CodeGen.to_js_name(mod) << ", "
+            end
+            str << CodeGen.to_js_name(included_modules[-1]) << "])"
+          end
+          str << ";\n"
 
           # Assign constructor function
           str << js_name << ".prototype.constructor = " << js_name << ";\n"
