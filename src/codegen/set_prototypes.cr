@@ -49,6 +49,9 @@ class CrystalScript::CodeGen
 
           # Assign constructor function
           str << js_name << ".prototype.constructor = " << js_name << ";\n"
+
+          # Define mthods on the type
+          str << define_methods(named_type)
         else
           # TODO!
           # str << "const Crystal_Program." << named_type.to_s.gsub("::", ".")

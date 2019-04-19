@@ -6,6 +6,10 @@ module CrystalScript
     "Crystal__Program"
   end
 
+  def self.method_class
+    self.global_class + ".$crystal__method"
+  end
+
   class CodeGen
     getter program : Program
     getter node : ASTNode

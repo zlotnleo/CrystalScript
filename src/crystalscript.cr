@@ -75,6 +75,12 @@ class Plane < Vehicle
         "I'm a plane"
     end
 end
+
+def some_method(x, y = 1, z = 3)
+    puts "x: \#{x}, y: \#{y}, z: \#{z}"
+end
+
+some_method 10, z: 5
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")
