@@ -7,7 +7,14 @@ class CrystalScript::CodeGen
           str << "['" << method_name << "']" << " = new "
           str << CrystalScript.method_class << "(["
           method_defs.each do |method_def|
-            # TODO
+            str << "{\n"
+            str << "  func: function (args) {\n"
+            # TODO body generation
+            str << "  },\n"
+            str << "  min_args: " << method_def.min_size << ",\n"
+            str << "  max_args: " << method_def.max_size << ",\n"
+            str << "  has_block: " << (method_def.yields ? "true" : "false") << ",\n"
+            str << "}, "
           end
           str << "]);\n"
         end
