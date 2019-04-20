@@ -8,6 +8,10 @@ targets:
   CrystalScript:
     main: src/CrystalScript.cr
 
+dependencies:
+    crustache:
+        github: MakeNowJust/crustache
+
 crystal: 0.27.0
 
 license: MIT
