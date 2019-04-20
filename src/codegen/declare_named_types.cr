@@ -18,9 +18,11 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          model = Hash(String, String | Array(Hash(String, String))) {"TypeName" => js_name}
+          model = Hash(String, String | Hash(String, String) | Array(Hash(String, String))) {
+            "TypeName" => js_name
+          }
           model["is_object"] = [{} of String => String] if named_type.full_name == "Object"
-          model["has_superclass"] = [{"SuperClass" => js_superclass}] unless js_superclass.nil?
+          model["has_superclass"] = {"SuperClass" => js_superclass} unless js_superclass.nil?
           model["included_modules"] = [] of Hash(String, String)
           included_modules.each do |mod|
             mod_js_name = CodeGen.to_js_name(mod)
