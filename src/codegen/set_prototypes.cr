@@ -9,48 +9,29 @@ class CrystalScript::CodeGen
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
           js_name = CodeGen.to_js_name(named_type)
+          if js_name.nil?
+            CrystalScript.logger.error("Found named type with no name: #{named_type}")
+            break
+          end
           js_superclass = CodeGen.to_js_name(named_type.superclass)
           included_modules = named_type.parents.dup
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          # Set name
-          str << "Object.defineProperty(" << js_name << ".prototype.constructor, 'name', {value: '" << named_type.full_name << "'});\n"
-
-          # Set superclass and add mixin methods
-          str << js_name << ".prototype = Object.assign("
-          str << "Object.create("
-          if js_superclass.nil?
-            str << "null"
-          else
-            str << js_superclass + ".prototype"
-          end
-          str << ")"
+          model = Hash(String, String | Hash(String, String) | Array(Hash(String, String)) | Bool) {
+            "TypeName" => js_name, "DisplayName" => named_type.full_name
+          }
+          model["has_superclass"] = {"SuperClass" => js_superclass} unless js_superclass.nil?
+          model["has_included_modules"] = !included_modules.empty?
+          model["included_modules"] = [] of Hash(String, String)
           included_modules.each do |mod|
-            str  << ", " << CodeGen.to_js_name(mod) << ".prototype"
+            mod_js_name = CodeGen.to_js_name(mod)
+            model["included_modules"].as(Array) << {"Module" => mod_js_name} unless mod_js_name.nil?
           end
-          str << ");\n"
 
-          # Set list of included modules
-          str << js_name << ".prototype.$included_modules = "
-          if js_superclass.nil?
-            str << "[]"
-          else
-            str << js_superclass << ".prototype.$included_modules"
-          end
-          unless included_modules.empty?
-            str << ".concat(["
-            included_modules[0...-1].each do |mod|
-              str << CodeGen.to_js_name(mod) << ", "
-            end
-            str << CodeGen.to_js_name(included_modules[-1]) << "])"
-          end
-          str << ";\n"
+          str << Crustache.render CodeGen::Templates::INIT_TYPE, model
 
-          # Assign constructor function
-          str << js_name << ".prototype.constructor = " << js_name << ";\n"
-
-          # Define mthods on the type
+          # Define methods on the type
           str << define_methods(named_type)
         else
           # TODO!
