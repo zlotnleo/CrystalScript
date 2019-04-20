@@ -79,7 +79,13 @@ module CrystalScript
     end
 
     private def generate(node : ExpandableNode)
-      raise ::Exception.new("The node #{node.class} should be expanded before code genration!")
+      if (expanded = node.expanded).nil?
+        # raise ::Exception.new("The node #{node.class} should be expanded before code genration!")
+        CrystalScript.logger.error("unexpanded expandable node #{node}")
+        return "/* BUG: unexpanded expandable node #{node} */"
+      else
+        return generate(expanded)
+      end
     end
 
     private def generate(node : ASTNode)
