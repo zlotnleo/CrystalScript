@@ -60,4 +60,23 @@ module CrystalScript::CodeGen::Templates
   };
 
   CREATE_METHOD_CLASS
+
+  DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
+  {{{TypeName}}}.prototype['{{{MethodName}}}'] = new {{{GlobalClass}}}.{{{MethodClass}}}([{{#funcs}}{
+    func: function (args) {
+
+    },
+    min_args: {{{MinArgs}}},
+    max_args: {{{MaxArgs}}},
+    has_block: {{{HasBlock}}},
+    args: [],
+    {{#has_external_names}}
+    external_names: { {{#external_names}}
+      '{{{ExternalName}}}': '{{{InternalName}}}',
+    {{/external_names}}
+    },
+    {{/has_external_names}}
+  },{{/funcs}}]);
+
+  DEFINE_METHODS
 end
