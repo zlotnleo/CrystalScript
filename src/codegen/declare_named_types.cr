@@ -21,7 +21,7 @@ class CrystalScript::CodeGen
           model = Hash(String, String | Hash(String, String) | Array(Hash(String, String)) | Bool) {
             "TypeName" => js_name
           }
-          model["is_object"] = true if named_type.full_name == "Object"
+          model["is_object"] = named_type.full_name == "Object"
           model["has_superclass"] = {"SuperClass" => js_superclass} unless js_superclass.nil?
           model["included_modules"] = [] of Hash(String, String)
           included_modules.each do |mod|
