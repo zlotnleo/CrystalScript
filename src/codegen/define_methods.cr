@@ -5,7 +5,7 @@ class CrystalScript::CodeGen
         defs.each do |method_name, method_defs|
           str << CodeGen.to_js_name(named_type) << ".prototype"
           str << "['" << method_name << "']" << " = new "
-          str << CrystalScript.method_class << "(["
+          str << CrystalScript::GLOBAL_CLASS << "." << CrystalScript::METHOD_CLASS << "(["
           method_defs.each do |method_def|
             str << "{\n"
             str << "  func: function (args) {\n"

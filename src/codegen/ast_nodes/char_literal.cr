@@ -1,5 +1,5 @@
 class CrystalScript::CodeGen
   private def generate(node : CharLiteral)
-    "new #{CrystalScript.global_class}.Char()"
+    "new #{CrystalScript::GLOBAL_CLASS}.Char()"
   end
 end

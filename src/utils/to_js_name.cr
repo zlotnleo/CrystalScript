@@ -4,7 +4,7 @@ class CrystalScript::CodeGen
     when Nil
       return nil
     when NamedType
-      return CrystalScript.global_class + "." + named_type.full_name.gsub("::", ".")
+      return CrystalScript::GLOBAL_CLASS + "." + named_type.full_name.gsub("::", ".")
     when GenericInstanceType
       return self.to_js_name(named_type.generic_type)
     else

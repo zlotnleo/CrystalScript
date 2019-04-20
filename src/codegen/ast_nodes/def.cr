@@ -15,7 +15,7 @@ class CrystalScript::CodeGen
     # TODO: overloading, splats, named arguments, super, etc.
 
     String.build do |str|
-      str << CrystalScript.global_class << "."
+      str << CrystalScript::GLOBAL_CLASS << "."
       case node.owner
       when Program
         str << node.name

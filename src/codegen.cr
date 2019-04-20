@@ -3,11 +3,8 @@ require "./codegen/**"
 require "crustache"
 
 module CrystalScript
-  class_getter global_class = "Crystal__Program"
-
-  def self.method_class
-    self.global_class + ".$crystal__method"
-  end
+  GLOBAL_CLASS = "Crystal__Program"
+  METHOD_CLASS = "$crystal__method"
 
   class CodeGen
     getter program : Program
@@ -28,58 +25,22 @@ module CrystalScript
     end
 
     def generate
-      code = init_global_class
+      code = Crustache.render CodeGen::Templates::INIT_GLOBAL_CLASS,  {
+        "GlobalClass" => CrystalScript::GLOBAL_CLASS
+      }
+      code += Crustache.render CodeGen::Templates::CREATE_METHOD_CLASS, {
+        "GlobalClass" => CrystalScript::GLOBAL_CLASS,
+        "MethodClass" => CrystalScript::METHOD_CLASS
+      }
 
       # TODO: generate symbol table
-
-      # program = result.program
-      # puts <<-PROGRAM
-      # symbols: #{program.symbols}
-
-      # global_vars: #{program.global_vars}
-
-      # vars: #{program.vars} : #{program.vars.class}
-
-      # requires: #{program.requires}
-
-      # file_modules: #{program.file_modules} : #{program.file_modules.class}
-
-      # PROGRAM
 
       @ntv.accept(@node)
       code += declare_named_types
       code += set_named_types_prototypes
 
-      # @ntv.traverse_tree do |named_type|
-      #   nt = named_type
-
-      #   begin
-      #     including_types = nt.including_types
-      #   rescue
-      #   end
-
-      #   begin
-      #     direct_subclasses = nt.subclasses
-      #   rescue
-      #   end
-
-      #   puts <<-NAMED_INFO
-      #   "#{nt.name}:
-      #       including_types: #{including_types}
-      #       subclasses: #{direct_subclasses}
-      #   NAMED_INFO
-      #   # defs: #{nt.defs}
-      # end
-
-      # code += CrystalScript.include_js_sources
-
       # code += generate(@node)
       code
-    end
-
-    private def init_global_class
-      template = Crustache.parse "const {{GlobalClass}} = Object.create(null);\n"
-      Crustache.render template, {"GlobalClass" => CrystalScript.global_class}
     end
 
     private def generate(node : ExpandableNode)
