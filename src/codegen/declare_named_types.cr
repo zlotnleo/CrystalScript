@@ -9,25 +9,27 @@ class CrystalScript::CodeGen
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
           js_name = CodeGen.to_js_name(named_type)
+          if js_name.nil?
+            CrystalScript.logger.error("Found named type with no name: #{named_type}")
+            break
+          end
           js_superclass = CodeGen.to_js_name(named_type.superclass)
           included_modules = named_type.parents.dup
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          str << js_name << " = function() {\n"
-          if named_type.full_name == "Object"
-            str << "  this.$class_vars = Object.create(null);\n"
-          end
-          unless js_superclass.nil?
-            str << "  " << js_superclass << ".call(this);\n"
-          end
+          model = Hash(String, String | Array(Hash(String, String))) {"TypeName" => js_name}
+          model["is_object"] = [{} of String => String] if named_type.full_name == "Object"
+          model["has_superclass"] = [{"SuperClass" => js_superclass}] unless js_superclass.nil?
+          model["included_modules"] = [] of Hash(String, String)
           included_modules.each do |mod|
-            str << "  " << CodeGen.to_js_name(mod) << ".call(this);\n"
+            mod_js_name = CodeGen.to_js_name(mod)
+            model["included_modules"].as(Array) << {"Module" => mod_js_name} unless mod_js_name.nil?
           end
-          str << "};\n"
+
+          str << Crustache.render CodeGen::Templates::TYPE_DECLARATION, model
         else
-          # TODO!
-          # str << "const Crystal_Program." << named_type.to_s.gsub("::", ".")
+          # TODO?
           str << "// Not implemented: " << named_type << " : " << named_type.class << "\n"
         end
       end

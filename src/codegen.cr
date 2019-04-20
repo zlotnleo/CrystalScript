@@ -1,10 +1,9 @@
 require "./js_helpers/**"
 require "./codegen/**"
+require "crustache"
 
 module CrystalScript
-  def self.global_class
-    "Crystal__Program"
-  end
+  class_getter global_class = "Crystal__Program"
 
   def self.method_class
     self.global_class + ".$crystal__method"
@@ -29,7 +28,7 @@ module CrystalScript
     end
 
     def generate
-      code = "const #{CrystalScript.global_class} = Object.create(null);\n"
+      code = init_global_class
 
       # TODO: generate symbol table
 
@@ -76,6 +75,11 @@ module CrystalScript
 
       # code += generate(@node)
       code
+    end
+
+    private def init_global_class
+      template = Crustache.parse "const {{GlobalClass}} = Object.create(null);\n"
+      Crustache.render template, {"GlobalClass" => CrystalScript.global_class}
     end
 
     private def generate(node : ExpandableNode)
