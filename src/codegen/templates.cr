@@ -72,8 +72,7 @@ module CrystalScript::CodeGen::Templates
     args: [],
     {{#has_external_names}}
     external_names: { {{#external_names}}
-      '{{{ExternalName}}}': '{{{InternalName}}}',
-    {{/external_names}}
+      '{{{ExternalName}}}': '{{{InternalName}}}',{{/external_names}}
     },
     {{/has_external_names}}
   },{{/funcs}}]);

@@ -18,18 +18,20 @@ class CrystalScript::CodeGen
           included_modules = [] of Crystal::Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
-          model = Hash(String, String | Hash(String, String) | Array(Hash(String, String)) | Bool) {
-            "TypeName" => js_name
+          model = {
+            "TypeName" => js_name,
+            "is_object" => named_type.full_name == "Object",
+            "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass},
+            "included_modules" => included_modules.map do |mod|
+              CodeGen.to_js_name mod
+            end.select do |mod_name|
+              !mod_name.nil?
+            end.map do |mod_name|
+              {"Module" => mod_name}
+            end
           }
-          model["is_object"] = named_type.full_name == "Object"
-          model["has_superclass"] = {"SuperClass" => js_superclass} unless js_superclass.nil?
-          model["included_modules"] = [] of Hash(String, String)
-          included_modules.each do |mod|
-            mod_js_name = CodeGen.to_js_name(mod)
-            model["included_modules"].as(Array) << {"Module" => mod_js_name} unless mod_js_name.nil?
-          end
 
-          str << Crustache.render CodeGen::Templates::TYPE_DECLARATION, model
+          str << Crustache.render Templates::TYPE_DECLARATION, model
         else
           # TODO?
           str << "// Not implemented: " << named_type << " : " << named_type.class << "\n"

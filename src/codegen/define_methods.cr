@@ -9,40 +9,39 @@ class CrystalScript::CodeGen
     String.build do |str|
       unless (defs = named_type.defs).nil?
         defs.each do |method_name, method_defs|
-          model = Hash(String, String | Hash(String, String) | Array(Hash(String, String)) | Bool) {
+          model = {
             "GlobalClass" => CrystalScript::GLOBAL_CLASS,
             "MethodClass" => CrystalScript::METHOD_CLASS,
             "TypeName" => js_type_name,
-            "MethodName" => method_name
+            "MethodName" => method_name,
+            "funcs" => method_defs.map do |method_def|
+              {
+                "MinArgs" => method_def.min_size.to_s,
+                "MaxArgs" => method_def.max_size.to_s,
+                "HasBlock" => method_def.yields ? "true" : "false",
+                "has_external_names" => begin
+                  different_name_args = method_def.def.args.select do |arg|
+                    arg.external_name != arg.name
+                  end
+                  if different_name_args.empty?
+                    false
+                  else
+                    {
+                      "external_names" => different_name_args.map do |arg|
+                        {
+                          "ExternalName" => arg.external_name,
+                          "InternalName" => arg.name
+                        }
+                      end
+                    }
+                  end
+                end
+              }
+            end
           }
-          model["funcs"] = method_defs.map do |method_def|
-            {
-              "MinArgs" => method_def.min_size.to_s,
-              "MaxArgs" => method_def.max_size.to_s,
-              "HasBlock" => method_def.yields ? "true" : "false",
-            }
-          end
 
-          str << Crustache.render CodeGen::Templates::DEFINE_METHODS, model
+          str << Crustache.render Templates::DEFINE_METHODS, model
         end
-
-        # defs.each do |method_name, method_defs|
-        #   str << CodeGen.to_js_name(named_type) << ".prototype"
-        #   str << "['" << method_name << "']" << " = new "
-        #   str << CrystalScript::GLOBAL_CLASS << "." << CrystalScript::METHOD_CLASS << "(["
-        #   method_defs.each do |method_def|
-        #     str << "{\n"
-        #     str << "  func: function (args) {\n"
-        #     str << "    " << set_local_vars_from_arguments(method_def.def, "args") << "\n"
-        #     # TODO body generation
-        #     str << "  },\n"
-        #     str << "  min_args: " << method_def.min_size << ",\n"
-        #     str << "  max_args: " << method_def.max_size << ",\n"
-        #     str << "  has_block: " << (method_def.yields ? "true" : "false") << ",\n"
-        #     str << "}, "
-        #   end
-        #   str << "]);\n"
-        # end
       end
     end
   end

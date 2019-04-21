@@ -25,10 +25,10 @@ module CrystalScript
     end
 
     def generate
-      code = Crustache.render CodeGen::Templates::INIT_GLOBAL_CLASS,  {
+      code = Crustache.render Templates::INIT_GLOBAL_CLASS,  {
         "GlobalClass" => CrystalScript::GLOBAL_CLASS
       }
-      code += Crustache.render CodeGen::Templates::CREATE_METHOD_CLASS, {
+      code += Crustache.render Templates::CREATE_METHOD_CLASS, {
         "GlobalClass" => CrystalScript::GLOBAL_CLASS,
         "MethodClass" => CrystalScript::METHOD_CLASS
       }
