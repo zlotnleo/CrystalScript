@@ -80,9 +80,11 @@ module CrystalScript::CodeGen::Templates
   DEFINE_METHODS
 
   CLASS_NEW = Crustache.parse <<-CLASS_NEW
-  {{{TypeName}}}.new = function(this_arg, block, args) {
+  {{{TypeName}}}.new = function(this_arg, block, ...args) {
     let _ = new {{{TypeName}}}();
-    _.initialize.call(_, block, args);
+    if (_.initialise !== undefined) {
+      _.initialize.call(_, block, ...args);
+    }
     return _;
   };
 
