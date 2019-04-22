@@ -5,7 +5,12 @@ class CrystalScript::CodeGen
     "instanceof", "new", "return", "super", "switch", "this", "throw",
     "try", "typeof", "var", "void", "while", "with", "yield"]
 
-  def self.is_reserved(name)
+  def self.reserved(name)
     @@js_reserved_keywords.any?(name)
+  end
+
+  def self.safe_var_name(name)
+    return name unless reserved(name)
+    return "$#{name}"
   end
 end

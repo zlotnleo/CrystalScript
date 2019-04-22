@@ -63,7 +63,7 @@ module CrystalScript::CodeGen::Templates
 
   DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
   {{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new {{{GlobalClass}}}.{{{MethodClass}}}([{{#funcs}}{
-    func: function (args) {
+    func: function {{=<% %>=}}({<%#func_args%><%& ArgName%><%#has_default%> = <%& DefaultVal%><%/has_default%>, <%/func_args%>})<%={{ }}=%> {
     {{{MethodBody}}}
     },
     min_args: {{{MinArgs}}},

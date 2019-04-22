@@ -30,6 +30,22 @@ class CrystalScript::CodeGen
             "MaxArgs" => method_def.max_size.to_s,
             "HasBlock" => method_def.yields ? "true" : "false",
             "MethodBody" => "/* #{method_def.def.body} */",
+            "func_args" => method_def.def.args.select do |arg|
+              !arg.name.empty?
+            end.map do |arg|
+              {
+                "ArgName" => CodeGen.safe_var_name(arg.name),
+                "has_default" => begin
+                  if (default = arg.default_value).nil?
+                    false
+                  else
+                    {
+                      "DefaultVal" => generate(default)
+                    }
+                  end
+                end
+              }
+            end,
             "has_external_names" => begin
               different_name_args = method_def.def.args.select do |arg|
                 arg.external_name != arg.name
@@ -53,38 +69,5 @@ class CrystalScript::CodeGen
 
       str << Crustache.render Templates::DEFINE_METHODS, model
     end
-  end
-
-  private def set_local_vars_from_arguments(method_def, param_name)
-    String.build do |str|
-      # TODO: fix clash with JS keywords
-      # TODO: fix empty named args
-      args = method_def.args
-      unless args.empty?
-        str << "let {"
-        method_def.args.each do |arg|
-          str << arg.name << ","
-          if arg.name.empty?
-            CrystalScript.logger.debug("Argument without name in method #{method_def}")
-          end
-        end
-        str << "} = Object.assign({"
-        method_def.args.each do |arg|
-          unless (default = arg.default_value).nil?
-            str << "'" << arg.name << "': " << generate(default) << ","
-          end
-        end
-        str << "}, " << param_name << ");"
-      end
-    end
-
-
-
-    # named_args = method_def.def.args.select { |arg| !arg.default_value.nil? }
-    # CrystalScript.logger.warn("In #{method_def.def.owner}.#{method_def.def.name}: #{named_args}") unless named_args.empty?
-
-    # String.build do |str|
-    #   # str << "let {"
-    # end
   end
 end

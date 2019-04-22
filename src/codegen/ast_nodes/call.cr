@@ -1,6 +1,7 @@
 class CrystalScript::CodeGen
   private def generate(node : Call)
-    return "// Method call: #{node.name}"
+    # TODO: fix temporary undefined for when method call is used a default
+    return "undefined /* Method call: #{node.name} */"
     # code = ""
     # obj = node.obj
     # if obj.is_a?(ASTNode)

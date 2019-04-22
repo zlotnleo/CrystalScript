@@ -47,7 +47,8 @@ module CrystalScript
       if (expanded = node.expanded).nil?
         # raise ::Exception.new("The node #{node.class} should be expanded before code genration!")
         CrystalScript.logger.error("unexpanded expandable node #{node}")
-        return "/* BUG: unexpanded expandable node #{node} */"
+        # TODO: fix temporary undefined for when method call is used a default
+        return "undefined /* BUG: unexpanded expandable node #{node} */"
       else
         return generate(expanded)
       end
