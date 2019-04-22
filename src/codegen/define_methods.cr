@@ -2,7 +2,12 @@ class CrystalScript::CodeGen
   def define_methods(named_type : NamedType)
     type_name = CodeGen.to_js_name(named_type)
     String.build do |str|
+      if named_type.is_a? ClassType
+        str << Crustache.render Templates::CLASS_NEW, {"TypeName" => type_name}
+      end
       unless (defs = named_type.metaclass.defs).nil?
+        defs.delete("allocate")
+        defs.delete("new")
         define_methods str, type_name, defs, instance: false
       end
       unless (defs = named_type.defs).nil?

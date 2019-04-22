@@ -77,12 +77,17 @@ class Plane < Vehicle
 end
 
 class Test
+  property value
+
   def self.class_method
     puts "Class"
   end
 
   def instance_method
     puts "Instance"
+  end
+
+  def initialize(@value = 3)
   end
 end
 PROGRAM
