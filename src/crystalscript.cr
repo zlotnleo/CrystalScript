@@ -77,12 +77,14 @@ class Plane < Vehicle
 end
 
 class Test
-  def self.some_method(x, y = 1, z = 3)
-      puts "x: \#{x}, y: \#{y}, z: \#{z}"
+  def self.class_method
+    puts "Class"
+  end
+
+  def instance_method
+    puts "Instance"
   end
 end
-
-Test.some_method 10, z: 5
 PROGRAM
 
 result = CrystalScript.compile(source, "out.js")

@@ -26,6 +26,7 @@ module CrystalScript::CodeGen::Templates
   {{{TypeName}}}.prototype = Object.assign(Object.create({{#has_superclass}}{{{SuperClass}}}.prototype{{/has_superclass}}{{^has_superclass}}null{{/has_superclass}}){{#included_modules}}, {{{Module}}}.prototype{{/included_modules}});
   {{{TypeName}}}.prototype.$included_modules = {{#has_superclass}}{{{SuperClass}}}.prototype.$included_modules{{/has_superclass}}{{^has_superclass}}[]{{/has_superclass}}{{#has_included_modules}}.concat([{{#included_modules}}{{{Module}}},{{/included_modules}}]){{/has_included_modules}};
   {{{TypeName}}}.prototype.constructor = {{{TypeName}}};
+
   INIT_TYPE
 
   CREATE_METHOD_CLASS = Crustache.parse <<-CREATE_METHOD_CLASS
@@ -61,9 +62,9 @@ module CrystalScript::CodeGen::Templates
   CREATE_METHOD_CLASS
 
   DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
-  {{{TypeName}}}.prototype['{{{MethodName}}}'] = new {{{GlobalClass}}}.{{{MethodClass}}}([{{#funcs}}{
+  {{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new {{{GlobalClass}}}.{{{MethodClass}}}([{{#funcs}}{
     func: function (args) {
-
+    {{{MethodBody}}}
     },
     min_args: {{{MinArgs}}},
     max_args: {{{MaxArgs}}},

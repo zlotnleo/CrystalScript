@@ -9,13 +9,9 @@ class CrystalScript::CodeGen
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
           js_name = CodeGen.to_js_name(named_type)
-          if js_name.nil?
-            CrystalScript.logger.error("Found named type with no name: #{named_type}")
-            break
-          end
-          js_superclass = CodeGen.to_js_name(named_type.superclass)
+          js_superclass = CodeGen.to_js_name named_type.superclass
           included_modules = named_type.parents.dup
-          included_modules = [] of Crystal::Type if included_modules.nil?
+          included_modules = [] of Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
 
           model = {
@@ -23,9 +19,12 @@ class CrystalScript::CodeGen
             "DisplayName" => named_type.full_name,
             "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass},
             "has_included_modules" => !included_modules.empty?,
-            "included_modules" => included_modules.map do |mod| CodeGen.to_js_name mod
-            end.select do |mod_name| !mod_name.nil?
-            end.map do |mod_name| {"Module" => mod_name}
+            "included_modules" => included_modules.map do |mod|
+              CodeGen.to_js_name mod
+            end.select do |mod_name|
+              !mod_name.nil?
+            end.map do |mod_name|
+              {"Module" => mod_name}
             end
           }
 
