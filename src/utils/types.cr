@@ -27,6 +27,6 @@ module CrystalScript
     else
       raise NotImplementedError.new("Unknown primitive class #{class_name}")
     end
-    return CrystalScript.GLOBAL_CLASS + "." + js_class_name
+    return CrystalScript::GLOBAL_CLASS + "." + js_class_name
   end
 end

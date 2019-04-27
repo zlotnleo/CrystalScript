@@ -1,4 +1,3 @@
-require "./js_helpers/**"
 require "./codegen/**"
 require "crustache"
 
