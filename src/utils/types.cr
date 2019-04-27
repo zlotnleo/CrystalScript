@@ -1,6 +1,4 @@
 module CrystalScript
-  CLASS_NAME_PREFIX = "Crystal__"
-
   def self.get_number_class(kind)
     case kind
     when :i8 then return "Int8"
@@ -29,6 +27,6 @@ module CrystalScript
     else
       raise NotImplementedError.new("Unknown primitive class #{class_name}")
     end
-    return CLASS_NAME_PREFIX + js_class_name
+    return CrystalScript.GLOBAL_CLASS + "." + js_class_name
   end
 end
