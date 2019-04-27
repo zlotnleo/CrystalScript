@@ -1,5 +1,5 @@
 require "compiler/crystal/**"
-require "./codegen"
+require "./codegen/**"
 require "./utils/*"
 
 class CrystalScript
