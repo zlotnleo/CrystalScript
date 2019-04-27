@@ -1,4 +1,4 @@
-class CrystalScript::CodeGen
+class CrystalScript
   @@js_reserved_keywords = ["break", "case", "catch", "class", "const",
     "continue", "debugger", "default", "delete", "do", "else", "export",
     "extends", "finally", "for", "function", "if", "import", "in",

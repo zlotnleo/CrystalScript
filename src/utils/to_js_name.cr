@@ -1,4 +1,4 @@
-class CrystalScript::CodeGen
+class CrystalScript
   def self.to_js_name(named_type : NamedType)
     CrystalScript::GLOBAL_CLASS + "." + named_type.full_name.gsub("::", ".")
   end

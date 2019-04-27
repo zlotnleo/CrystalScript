@@ -1,6 +1,6 @@
-class CrystalScript::CodeGen
+class CrystalScript
   def define_methods(named_type : NamedType)
-    type_name = CodeGen.to_js_name(named_type)
+    type_name = CrystalScript.to_js_name(named_type)
     String.build do |str|
       if named_type.is_a? ClassType
         str << Crustache.render Templates::CLASS_NEW, {
@@ -23,7 +23,6 @@ class CrystalScript::CodeGen
     defs.each do |method_name, method_defs|
       model = {
         "GlobalClass" => CrystalScript::GLOBAL_CLASS,
-        "MethodClass" => CrystalScript::METHOD_CLASS,
         "is_instance" => instance,
         "TypeName" => name,
         "MethodName" => method_name,
@@ -37,13 +36,13 @@ class CrystalScript::CodeGen
               !arg.name.empty?
             end.map do |arg|
               {
-                "ArgName" => CodeGen.safe_var_name(arg.name),
+                "ArgName" => CrystalScript.safe_var_name(arg.name),
                 "has_default" => begin
                   if (default = arg.default_value).nil?
                     false
                   else
                     {
-                      "DefaultVal" => generate(default)
+                      "DefaultVal" => "undefined /* PlaceHolder */" # generate(default)
                     }
                   end
                 end

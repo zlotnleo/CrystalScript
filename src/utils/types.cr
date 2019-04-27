@@ -1,4 +1,4 @@
-module CrystalScript
+class CrystalScript
   def self.get_number_class(kind)
     case kind
     when :i8 then return "Int8"

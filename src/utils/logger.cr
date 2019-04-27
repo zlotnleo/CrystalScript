@@ -1,4 +1,4 @@
-module CrystalScript
+class CrystalScript
   class_property logger = Logger.new(STDERR,
     progname: "CrystalScript",
     level: Logger::DEBUG,

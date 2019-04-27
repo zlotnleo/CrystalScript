@@ -1,4 +1,4 @@
-module CrystalScript
+class CrystalScript
   def self.indent(code, *, by = 2, blocks = 1)
     indent = blocks * by
     String.build do |str|

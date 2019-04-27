@@ -2,18 +2,35 @@ require "compiler/crystal/**"
 require "./codegen"
 require "./utils/*"
 
-module CrystalScript
+class CrystalScript
   include Crystal
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
-  class CodeGen
-    def generate(node : ModuleDef | ClassDef)
-      generate(node.body)
-    end
+  GLOBAL_CLASS = "Crystal_Program"
 
-    def generate(node : Path)
-      "(Path #{node.names})"
-    end
+  getter program : Program
+  getter node : ASTNode
+  @ntv = NamedTypeVisitor.new
+
+  def initialize(@program, @node)
+  end
+
+  def generate
+    code = Crustache.render Templates::INIT_GLOBAL_CLASS,  {
+      "GlobalClass" => CrystalScript::GLOBAL_CLASS
+    }
+    code += Crustache.render Templates::CREATE_METHOD_CLASS, {
+      "GlobalClass" => CrystalScript::GLOBAL_CLASS,
+    }
+
+    # TODO: generate symbol table
+
+    @ntv.accept(@node)
+    code += declare_named_types
+    code += set_named_types_prototypes
+
+    # code += generate(@node)
+    code
   end
 
   def self.compile(sources, output_filename)
@@ -22,14 +39,23 @@ module CrystalScript
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, output_filename)
 
-    code_gen = CodeGen.new(result.program, result.node)
-    code_gen.generate
+    CrystalScript.new(result.program, result.node).generate
   end
 
   def self.from_file(filename, output_filename)
     source = Crystal::Compiler::Source.new filename, File.read(filename)
     compile(source, output_filename)
   end
+
+  # class CodeGen
+  #   def generate(node : ModuleDef | ClassDef)
+  #     generate(node.body)
+  #   end
+
+  #   def generate(node : Path)
+  #     "(Path #{node.names})"
+  #   end
+  # end
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM

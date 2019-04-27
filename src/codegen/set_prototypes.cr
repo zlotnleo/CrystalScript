@@ -1,4 +1,4 @@
-class CrystalScript::CodeGen
+class CrystalScript
   def set_named_types_prototypes
     String.build do |str|
       @ntv.in_subclass_mixin_order do |named_type|
@@ -8,8 +8,8 @@ class CrystalScript::CodeGen
         # when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
-          js_name = CodeGen.to_js_name(named_type)
-          js_superclass = CodeGen.to_js_name named_type.superclass
+          js_name = CrystalScript.to_js_name(named_type)
+          js_superclass = CrystalScript.to_js_name named_type.superclass
           included_modules = named_type.parents.dup
           included_modules = [] of Type if included_modules.nil?
           included_modules.delete(named_type.superclass)
@@ -20,7 +20,7 @@ class CrystalScript::CodeGen
             "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass},
             "has_included_modules" => !included_modules.empty?,
             "included_modules" => included_modules.map do |mod|
-              CodeGen.to_js_name mod
+              CrystalScript.to_js_name mod
             end.select do |mod_name|
               !mod_name.nil?
             end.map do |mod_name|

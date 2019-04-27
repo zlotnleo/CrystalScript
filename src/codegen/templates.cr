@@ -1,6 +1,6 @@
 require "crustache"
 
-module CrystalScript::CodeGen::Templates
+module CrystalScript::Templates
   INIT_GLOBAL_CLASS = Crustache.parse <<-INIT_GLOBAL_CLASS
   const {{GlobalClass}} = Object.create(null);
 
@@ -30,8 +30,8 @@ module CrystalScript::CodeGen::Templates
   INIT_TYPE
 
   CREATE_METHOD_CLASS = Crustache.parse <<-CREATE_METHOD_CLASS
-  {{{GlobalClass}}}.{{{MethodClass}}} = function (funcs) { this.funcs = funcs; }
-  {{{GlobalClass}}}.{{{MethodClass}}}.prototype.call = function(this_arg, block, ...arg_vals) {
+  {{{GlobalClass}}}.$crystal_method = function (funcs) { this.funcs = funcs; }
+  {{{GlobalClass}}}.$crystal_method.prototype.call = function(this_arg, block, ...arg_vals) {
       let num_args = arg_vals.length;
       let initial_match = this.funcs.filter(func => num_args >= func.min_args && num_args <= func.max_args && (block === func.has_block));
 
@@ -62,7 +62,7 @@ module CrystalScript::CodeGen::Templates
   CREATE_METHOD_CLASS
 
   DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
-  {{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new {{{GlobalClass}}}.{{{MethodClass}}}([{{#funcs}}{
+  {{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new {{{GlobalClass}}}.$crystal_method([{{#funcs}}{
     func: function {{=<% %>=}}({<%#func_args%><%& ArgName%><%#has_default%> = <%& DefaultVal%><%/has_default%>, <%/func_args%>})<%={{ }}=%> {
     {{{MethodBody}}}
     },
