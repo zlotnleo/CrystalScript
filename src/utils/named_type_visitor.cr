@@ -11,12 +11,6 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
     node.accept_children(self)
   end
 
-  def in_namespace_order(&block)
-    @types.sort_by { |t| t.full_name.scan("::").size }.each do |t|
-      yield t
-    end
-  end
-
   private class Vertex
     property? visited = false
     getter :type
@@ -35,33 +29,34 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
     t
   end
 
-  private def toposort(vertices, mapping)
+  private def toposort(vertices, mapping, relation)
     order = [] of NamedType
     vertices.each do |v|
       unless v.visited?
-        toposort_visit(v, order, mapping)
+        toposort_visit(v, order, mapping, relation)
       end
     end
     order
   end
 
-  private def toposort_visit(v, order, mapping) : Nil
+  private def toposort_visit(v, order, mapping, relation) : Nil
     v.visited = true
-    if (parents = v.type.parents).nil?
-      parents = [] of Crystal::NamedType
-    end
-    parents.each do |p_type|
-      p_type = deinstanciate(p_type)
-      p_vertex = mapping[p_type]
+    unless (nodes = relation.call(v.type)).nil?
+      nodes.each do |p_type|
+        unless p_type.nil?
+          p_type = deinstanciate(p_type)
+          p_vertex = mapping[p_type]
 
-      unless p_vertex.visited?
-        toposort_visit(p_vertex, order, mapping)
+          unless p_vertex.visited?
+            toposort_visit(p_vertex, order, mapping, relation)
+          end
+        end
       end
     end
     order << v.type
   end
 
-  def in_subclass_mixin_order(&block)
+  def in_mixin_order(&block)
     mapping = {} of NamedType => Vertex
     vertices = [] of Vertex
 
@@ -71,7 +66,32 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
       mapping[t] = v
     end
 
-    toposort(vertices, mapping).each do |t|
+    toposort(vertices, mapping, ->(t : NamedType){
+      including_types = t.parents.dup || [] of Type
+      including_types.delete t.superclass
+      including_types
+    }).each do |t|
+      yield t
+    end
+  end
+
+  def in_subclass_namespace_order(&block)
+    mapping = {} of NamedType => Vertex
+    vertices = [] of Vertex
+
+    @types.each do |t|
+      v = Vertex.new t
+      vertices << v
+      mapping[t] = v
+    end
+
+    toposort(vertices, mapping, ->(t : NamedType){
+      if (namespace = t.namespace).is_a? Program || namespace.is_a? FileModule
+        [t.superclass]
+      else
+        [t.superclass, namespace]
+      end
+    }).each do |t|
       yield t
     end
   end

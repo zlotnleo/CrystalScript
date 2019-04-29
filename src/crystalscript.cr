@@ -7,6 +7,8 @@ class CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   GLOBAL_CLASS = "Crystal_Program"
+  METHOD_CLASS = "$Method"
+  NULL_CLASS = "$NullClass"
 
   getter program : Program
   getter node : ASTNode
@@ -16,17 +18,12 @@ class CrystalScript
   end
 
   def generate
-    code = Crustache.render Templates::INIT_GLOBAL_CLASS,  {
-      "GlobalClass" => CrystalScript::GLOBAL_CLASS
-    }
-    code += Crustache.render Templates::CREATE_METHOD_CLASS, {
-      "GlobalClass" => CrystalScript::GLOBAL_CLASS,
-    }
+    code = Crustache.render Templates::INIT_CRYSTALSCRIPT, nil
 
     # TODO: generate symbol table
 
     @ntv.accept(@node)
-    code += declare_named_types
+    code += init_named_types
     code += set_named_types_prototypes
 
     # code += generate(@node)
@@ -100,21 +97,6 @@ class Plane < Vehicle
     def describe
         "I'm a plane"
     end
-end
-
-class Test
-  property value
-
-  def self.class_method
-    puts "Class"
-  end
-
-  def instance_method
-    puts "Instance"
-  end
-
-  def initialize(@value = 3)
-  end
 end
 PROGRAM
 

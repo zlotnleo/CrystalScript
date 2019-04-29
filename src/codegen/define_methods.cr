@@ -22,7 +22,6 @@ class CrystalScript
   private def define_methods(str, name, defs, *, instance)
     defs.each do |method_name, method_defs|
       model = {
-        "GlobalClass" => CrystalScript::GLOBAL_CLASS,
         "is_instance" => instance,
         "TypeName" => name,
         "MethodName" => method_name,

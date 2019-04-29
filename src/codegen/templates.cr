@@ -1,37 +1,13 @@
 require "crustache"
 
 module CrystalScript::Templates
-  INIT_GLOBAL_CLASS = Crustache.parse <<-INIT_GLOBAL_CLASS
-  const {{GlobalClass}} = Object.create(null);
-
-  INIT_GLOBAL_CLASS
-
-  TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
-  {{{TypeName}}} = function (){
-    {{#is_object}}
-      this.$instance_vars = Object.create(null);
-    {{/is_object}}
-    {{#has_superclass}}
-      {{{SuperClass}}}.call(this);
-    {{/has_superclass}}
-    {{#included_modules}}
-      {{{Module}}}.call(this);
-    {{/included_modules}}
-  };
-
-  TYPE_DECLARATION
-
-  INIT_TYPE = Crustache.parse <<-INIT_TYPE
-  Object.defineProperty({{{TypeName}}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
-  {{{TypeName}}}.prototype = Object.assign(Object.create({{#has_superclass}}{{{SuperClass}}}.prototype{{/has_superclass}}{{^has_superclass}}null{{/has_superclass}}){{#included_modules}}, {{{Module}}}.prototype{{/included_modules}});
-  {{{TypeName}}}.prototype.$included_modules = {{#has_superclass}}{{{SuperClass}}}.prototype.$included_modules{{/has_superclass}}{{^has_superclass}}[]{{/has_superclass}}{{#has_included_modules}}.concat([{{#included_modules}}{{{Module}}},{{/included_modules}}]){{/has_included_modules}};
-  {{{TypeName}}}.prototype.constructor = {{{TypeName}}};
-
-  INIT_TYPE
-
-  CREATE_METHOD_CLASS = Crustache.parse <<-CREATE_METHOD_CLASS
-  {{{GlobalClass}}}.$crystal_method = function (funcs) { this.funcs = funcs; }
-  {{{GlobalClass}}}.$crystal_method.prototype.call = function(this_arg, block, ...arg_vals) {
+  INIT_CRYSTALSCRIPT = Crustache.parse <<-INIT_CRYSTALSCRIPT
+  const #{CrystalScript::GLOBAL_CLASS} = Object.create(null);
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} = function(){};
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS}.prototype = null;
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS} = class {
+    constructor(funcs) { this.funcs = funcs; }
+    call(this_arg, block, ...arg_vals) {
       let num_args = arg_vals.length;
       let initial_match = this.funcs.filter(func => num_args >= func.min_args && num_args <= func.max_args && (block === func.has_block));
 
@@ -57,12 +33,35 @@ module CrystalScript::Templates
       for(let i = 0; i < positional.length; i++) { args[func.args[i].name] = positional[i].value; }
       for(let named_arg of named) { args[named_arg.name] = named_arg.value; }
       return func.func.call(this_arg, args);
-  };
+    }
+  }
 
-  CREATE_METHOD_CLASS
+  INIT_CRYSTALSCRIPT
+
+  TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
+  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.{{#has_superclass}}{{{SuperClass}}}{{/has_superclass}}{{^has_superclass}}#{CrystalScript::NULL_CLASS}{{/has_superclass}} {
+    constructor() {
+      super();
+      {{#is_object}}
+      this.$instance_vars = Object.create(null);
+      {{/is_object}}
+    }
+  };
+  Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
+  ((typeTag) => {
+    Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
+    #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype[typeTag] = true;
+  })(Symbol());
+
+  TYPE_DECLARATION
+
+  ASSIGN_PROTO = Crustache.parse <<-ASSIGN_PROTO
+  Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype{{#included_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/included_modules}});
+
+  ASSIGN_PROTO
 
   DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
-  {{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new {{{GlobalClass}}}.$crystal_method([{{#funcs}}{
+  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS}([{{#funcs}}{
     func: function {{=<% %>=}}({<%#func_args%><%& ArgName%><%#has_default%> = <%& DefaultVal%><%/has_default%>, <%/func_args%>})<%={{ }}=%> {
     {{{MethodBody}}}
     },
@@ -80,8 +79,8 @@ module CrystalScript::Templates
   DEFINE_METHODS
 
   CLASS_NEW = Crustache.parse <<-CLASS_NEW
-  {{{TypeName}}}.new = function(this_arg, block, ...args) {
-    let _ = new {{{TypeName}}}();
+  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.new = function(this_arg, block, ...args) {
+    let _ = new #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}();
     {{#has_init}}
     _.initialize.call(_, block, ...args);
     {{/has_init}}

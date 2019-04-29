@@ -1,7 +1,7 @@
 class CrystalScript
   def set_named_types_prototypes
     String.build do |str|
-      @ntv.in_subclass_mixin_order do |named_type|
+      @ntv.in_mixin_order do |named_type|
         case named_type
         when FileModule
           # TODO. This case is used to avoid handling FileModule as other NamedType's
@@ -28,7 +28,7 @@ class CrystalScript
             end
           }
 
-          str << Crustache.render Templates::INIT_TYPE, model
+          str << Crustache.render Templates::ASSIGN_PROTO, model
 
           # Define methods on the type
           str << define_methods(named_type)
