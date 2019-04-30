@@ -38,30 +38,28 @@ module CrystalScript::Templates
 
   INIT_CRYSTALSCRIPT
 
-  OBJECT_TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
+  OBJECT_TYPE_DECLARATION = Crustache.parse <<-OBJECT_TYPE_DECLARATION
   #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} {
     constructor() {
       super();
       this.$instance_vars = Object.create(null);
     }
   };
-  Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
-  ((typeTag) => {
-    Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
-    #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype[typeTag] = true;
-  })(Symbol());
 
-  TYPE_DECLARATION
+  OBJECT_TYPE_DECLARATION
 
   TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
   #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.{{#has_superclass}}{{{SuperClass}}}{{/has_superclass}}{{^has_superclass}}#{CrystalScript::NULL_CLASS}{{/has_superclass}} {};
   Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
+
+  TYPE_DECLARATION
+
+  HAS_INSTANCE = Crustache.parse <<-HAS_INSTANCE
   ((typeTag) => {
     Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
     #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype[typeTag] = true;
   })(Symbol());
-
-  TYPE_DECLARATION
+  HAS_INSTANCE
 
   APPLY_INCLUDE = Crustache.parse <<-APPLY_INCLUDE
   Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype{{#included_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/included_modules}});
