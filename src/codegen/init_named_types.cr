@@ -17,15 +17,8 @@ class CrystalScript
           model = {
             "TypeName" => js_name,
             "DisplayName" => named_type.full_name,
-            "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass},
-            "has_included_modules" => !included_modules.empty?,
-            "included_modules" => included_modules.map do |mod|
-              CrystalScript.to_js_name mod
-            end.select do |mod_name|
-              !mod_name.nil?
-            end.map do |mod_name|
-              {"Module" => mod_name}
-            end
+            "is_object" => named_type.full_name == "Object",
+            "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass}
           }
 
           str << Crustache.render Templates::TYPE_DECLARATION, model

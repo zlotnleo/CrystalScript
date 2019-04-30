@@ -16,9 +16,6 @@ class CrystalScript
 
           model = {
             "TypeName" => js_name,
-            "DisplayName" => named_type.full_name,
-            "has_superclass" => js_superclass.nil? ? false : {"SuperClass" => js_superclass},
-            "has_included_modules" => !included_modules.empty?,
             "included_modules" => included_modules.map do |mod|
               CrystalScript.to_js_name mod
             end.select do |mod_name|
