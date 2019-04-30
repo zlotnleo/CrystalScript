@@ -112,7 +112,7 @@ module Mod
   end
 
   def self.method
-    "method"
+    "module"
   end
 end
 PROGRAM

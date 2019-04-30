@@ -1,5 +1,14 @@
 class CrystalScript
-  def define_methods(named_type : NamedType)
+  def define_instance_methods(named_type : NamedType)
+    type_name = CrystalScript.to_js_name(named_type)
+    String.build do |str|
+      unless (defs = named_type.defs).nil?
+        define_methods str, type_name, defs, instance: true
+      end
+    end
+  end
+
+  def define_class_methods(named_type : NamedType)
     type_name = CrystalScript.to_js_name(named_type)
     String.build do |str|
       if named_type.is_a? ClassType
@@ -12,9 +21,6 @@ class CrystalScript
         defs.delete("allocate")
         defs.delete("new")
         define_methods str, type_name, defs, instance: false
-      end
-      unless (defs = named_type.defs).nil?
-        define_methods str, type_name, defs, instance: true
       end
     end
   end

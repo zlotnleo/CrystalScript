@@ -19,6 +19,9 @@ class CrystalScript
             }
             str << Crustache.render Templates::APPLY_EXTEND, model
           end
+
+          # Define class methods on the type
+          str << define_class_methods(named_type)
         else
           # TODO!
           # str << "const Crystal_Program." << named_type.to_s.gsub("::", ".")
