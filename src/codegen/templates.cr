@@ -55,10 +55,15 @@ module CrystalScript::Templates
 
   TYPE_DECLARATION
 
-  ASSIGN_PROTO = Crustache.parse <<-ASSIGN_PROTO
+  APPLY_INCLUDE = Crustache.parse <<-APPLY_INCLUDE
   Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype{{#included_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/included_modules}});
 
-  ASSIGN_PROTO
+  APPLY_INCLUDE
+
+  APPLY_EXTEND = Crustache.parse <<-APPLY_EXTEND
+  Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}{{#extended_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/extended_modules}})
+
+  APPLY_EXTEND
 
   DEFINE_METHODS = Crustache.parse <<-DEFINE_METHODS
   #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}{{#is_instance}}.prototype{{/is_instance}}['{{{MethodName}}}'] = new #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS}([{{#funcs}}{

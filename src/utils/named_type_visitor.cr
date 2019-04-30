@@ -95,4 +95,10 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
       yield t
     end
   end
+
+  def in_any_order(&block)
+    @types.each do |t|
+      yield t
+    end
+  end
 end

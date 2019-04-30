@@ -24,7 +24,8 @@ class CrystalScript
 
     @ntv.accept(@node)
     code += init_named_types
-    code += set_named_types_prototypes
+    code += apply_include
+    code += apply_extend
 
     # code += generate(@node)
     code
@@ -97,6 +98,22 @@ class Plane < Vehicle
     def describe
         "I'm a plane"
     end
+end
+
+module Test
+  extend Action::Move
+end
+
+module Mod
+  extend self
+
+  def method
+    "instance"
+  end
+
+  def self.method
+    "method"
+  end
 end
 PROGRAM
 

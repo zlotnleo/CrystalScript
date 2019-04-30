@@ -1,5 +1,5 @@
 class CrystalScript
-  def set_named_types_prototypes
+  def apply_include
     String.build do |str|
       @ntv.in_mixin_order do |named_type|
         case named_type
@@ -8,24 +8,17 @@ class CrystalScript
         # when NonGenericModuleType, NonGenericClassType, MetaclassType, PrimitiveType
         when NamedType
           # TODO: handle if named_type.is_a? GenericType (and maybe GenericInstanceType)
-          js_name = CrystalScript.to_js_name(named_type)
-          js_superclass = CrystalScript.to_js_name named_type.superclass
-          included_modules = named_type.parents.dup
-          included_modules = [] of Type if included_modules.nil?
-          included_modules.delete(named_type.superclass)
 
-          model = {
-            "TypeName" => js_name,
-            "included_modules" => included_modules.map do |mod|
-              CrystalScript.to_js_name mod
-            end.select do |mod_name|
-              !mod_name.nil?
-            end.map do |mod_name|
-              {"Module" => mod_name}
-            end
-          }
-
-          str << Crustache.render Templates::ASSIGN_PROTO, model
+          included_modules = named_type.parents.try &.select { |parent| parent.module? }
+          unless included_modules.nil? || included_modules.empty?
+            model = {
+              "TypeName" => CrystalScript.to_js_name(named_type),
+              "included_modules" => included_modules.map do |mod|
+                {"Module" => CrystalScript.to_js_name mod}
+              end
+            }
+            str << Crustache.render Templates::APPLY_INCLUDE, model
+          end
 
           # Define methods on the type
           str << define_methods(named_type)
