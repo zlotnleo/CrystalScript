@@ -45,10 +45,14 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
       nodes.each do |p_type|
         unless p_type.nil?
           p_type = deinstanciate(p_type)
-          p_vertex = mapping[p_type]
+          p_vertex = mapping[p_type]?
 
-          unless p_vertex.visited?
-            toposort_visit(p_vertex, order, mapping, relation)
+          if p_vertex.nil?
+            CrystalScript.logger.error("Type #{p_type} was not visited!")
+          else
+            unless p_vertex.visited?
+              toposort_visit(p_vertex, order, mapping, relation)
+            end
           end
         end
       end

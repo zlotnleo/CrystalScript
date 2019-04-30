@@ -59,6 +59,7 @@ module CrystalScript::Templates
     Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
     #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype[typeTag] = true;
   })(Symbol());
+
   HAS_INSTANCE
 
   APPLY_INCLUDE = Crustache.parse <<-APPLY_INCLUDE
