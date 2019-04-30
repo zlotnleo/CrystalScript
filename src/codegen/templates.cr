@@ -7,7 +7,7 @@ module CrystalScript::Templates
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS}.prototype = null;
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS} = class {
     constructor(funcs) { this.funcs = funcs; }
-    call(this_arg, block, ...arg_vals) {
+    call(self, block, ...arg_vals) {
       let num_args = arg_vals.length;
       let initial_match = this.funcs.filter(func => num_args >= func.min_args && num_args <= func.max_args && (block === func.has_block));
 
@@ -32,7 +32,7 @@ module CrystalScript::Templates
       let args = Object.create(null);
       for(let i = 0; i < positional.length; i++) { args[func.args[i].name] = positional[i].value; }
       for(let named_arg of named) { args[named_arg.name] = named_arg.value; }
-      return func.func.call(this_arg, args);
+      return func.func.call(self, args);
     }
   }
 
@@ -91,7 +91,7 @@ module CrystalScript::Templates
   DEFINE_METHODS
 
   CLASS_NEW = Crustache.parse <<-CLASS_NEW
-  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.new = function(this_arg, block, ...args) {
+  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.new = function(self, block, ...args) {
     let _ = new #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}();
     {{#has_init}}
     _.initialize.call(_, block, ...args);
@@ -100,4 +100,9 @@ module CrystalScript::Templates
   };
 
   CLASS_NEW
+
+  CALL = Crustache.parse <<-CALL
+  ($obj => $obj['{{{MethodName}}}'].call($obj,{{{HasBlock}}}{{#args}}, {value:({{{Value}}})}{{/args}}{{#named_args}}, {value:({{{Value}}}), name: {{{Name}}}}{{/named_args}}))({{{Object}}})
+
+  CALL
 end
