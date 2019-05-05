@@ -9,10 +9,15 @@ class CrystalScript
   GLOBAL_CLASS = "Crystal_Program"
   METHOD_CLASS = "$Method"
   NULL_CLASS = "$NullClass"
+  TRUTHY = "$truthy"
 
   getter program : Program
   getter node : ASTNode
-  @ntv = NamedTypeVisitor.new
+  @nto = NamedTypeOrderer.new
+
+  @no_codegen = true
+  @no_cleanup = false
+  @prelude = "crs_prelude"
 
   def initialize(@program, @node)
   end
@@ -22,21 +27,31 @@ class CrystalScript
 
     # TODO: generate symbol table
 
-    @ntv.accept(@node)
+    @nto.visit(@program)
+    @nto.types.each do |tmp|
+      if tmp.full_name.starts_with? "Expand"
+        puts tmp
+        puts tmp.defs
+      end
+    end
+    exit 1
+
     code += init_named_types
     code += apply_include
     code += apply_extend
+
+    code += Crustache.render Templates::INIT_LITERALS, nil
 
     # code += generate(@node)
     code
   end
 
-  def self.compile(sources, output_filename)
+  def self.compile(sources)
     compiler = Crystal::Compiler.new
-    compiler.no_codegen = true
+    # compiler.no_codegen = true
+    compiler.no_cleanup = false
     compiler.prelude = "crs_prelude"
-    result = compiler.compile(sources, output_filename)
-
+    result = compiler.compile(sources, "out.js")
     CrystalScript.new(result.program, result.node).generate
   end
 
@@ -45,15 +60,15 @@ class CrystalScript
     compile(source, output_filename)
   end
 
-  # class CodeGen
-  #   def generate(node : ModuleDef | ClassDef)
-  #     generate(node.body)
-  #   end
+  class CodeGen
+    def generate(node : ModuleDef | ClassDef)
+      generate(node.body)
+    end
 
-  #   def generate(node : Path)
-  #     "(Path #{node.names})"
-  #   end
-  # end
+    def generate(node : Path)
+      "(Path #{node.names})"
+    end
+  end
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
@@ -115,7 +130,19 @@ module Mod
     "module"
   end
 end
+
+class ExpandTest
+  def m
+    a, b = 3, 4
+    c = 5 && 8
+    "str"
+  end
+end
+
+puts "Test"
+puts ExpandTest.new.m
+
 PROGRAM
 
-result = CrystalScript.compile(source, "out.js")
-puts result
+result = CrystalScript.compile(source)
+# puts result

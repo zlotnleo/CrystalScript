@@ -1,7 +1,7 @@
 class CrystalScript
   def init_named_types
     String.build do |str|
-      @ntv.in_subclass_namespace_order do |named_type|
+      @nto.in_subclass_namespace_order do |named_type|
         case named_type
         when FileModule
           # TODO. This case is used to avoid handling FileModule as other NamedType's

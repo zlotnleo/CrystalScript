@@ -1,14 +1,12 @@
-class CrystalScript::NamedTypeVisitor < Crystal::Visitor
-  @types = [] of Crystal::NamedType
+class CrystalScript::NamedTypeOrderer
+  getter types = Set(Crystal::NamedType).new
 
-  def visit(node : ModuleDef | ClassDef)
-    t = deinstanciate(node.resolved_type)
-    @types << t if @types.find(&.== t).nil?
-    node.accept_children(self)
-  end
-
-  def visit(node : ASTNode)
-    node.accept_children(self)
+  def visit(named_type : NamedType)
+    t = deinstantiate(named_type)
+    @types << t
+    named_type.types?.try &.values.each do |sub_t|
+      visit sub_t
+    end
   end
 
   private class Vertex
@@ -21,11 +19,11 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
     end
   end
 
-  private def deinstanciate(t : Crystal::GenericInstanceType)
+  private def deinstantiate(t : GenericInstanceType)
     t.generic_type
   end
 
-  private def deinstanciate(t : Crystal::Type)
+  private def deinstantiate(t : Type)
     t
   end
 
@@ -44,7 +42,7 @@ class CrystalScript::NamedTypeVisitor < Crystal::Visitor
     unless (nodes = relation.call(v.type)).nil?
       nodes.each do |p_type|
         unless p_type.nil?
-          p_type = deinstanciate(p_type)
+          p_type = deinstantiate(p_type)
           p_vertex = mapping[p_type]?
 
           if p_vertex.nil?

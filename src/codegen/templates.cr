@@ -5,6 +5,7 @@ module CrystalScript::Templates
   const #{CrystalScript::GLOBAL_CLASS} = Object.create(null);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} = function(){};
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS}.prototype = null;
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY} = v => !(v === #{CrystalScript::GLOBAL_CLASS}.nil || v === #{CrystalScript::GLOBAL_CLASS}.false);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS} = class {
     constructor(funcs) { this.funcs = funcs; }
     call(self, block, ...arg_vals) {
@@ -37,6 +38,12 @@ module CrystalScript::Templates
   }
 
   INIT_CRYSTALSCRIPT
+
+  INIT_LITERALS = Crustache.parse <<-INIT_LITERALS
+  #{CrystalScript::GLOBAL_CLASS}.nil = new #{CrystalScript::GLOBAL_CLASS}.Nil();
+  #{CrystalScript::GLOBAL_CLASS}.true = new #{CrystalScript::GLOBAL_CLASS}.Bool();
+  #{CrystalScript::GLOBAL_CLASS}.false = new #{CrystalScript::GLOBAL_CLASS}.Bool();
+  INIT_LITERALS
 
   OBJECT_TYPE_DECLARATION = Crustache.parse <<-OBJECT_TYPE_DECLARATION
   #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} {
@@ -103,6 +110,13 @@ module CrystalScript::Templates
 
   CALL = Crustache.parse <<-CALL
   ($obj => $obj['{{{MethodName}}}'].call($obj,{{{HasBlock}}}{{#args}}, {value:({{{Value}}})}{{/args}}{{#named_args}}, {value:({{{Value}}}), name: {{{Name}}}}{{/named_args}}))({{{Object}}})
-
   CALL
+
+  AND = Crustache.parse <<-AND
+  (($left, $get_right) => #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}($left) ? $get_right() : $left)({{{Left}}}, () => ({{{Right}}}))
+  AND
+
+  OR = Crustache.parse <<-OR
+  (($left, $get_right) => #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}($left) ? $left : $get_right())({{{Left}}}, () => ({{{Right}}}))
+  OR
 end

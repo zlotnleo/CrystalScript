@@ -3,6 +3,7 @@ class CrystalScript::ExpressionGen
   end
 
   @local_vars = ["self"] of String
+  @in_conditional = false
 
   def initialize
   end
@@ -58,7 +59,7 @@ class CrystalScript::ExpressionGen
   def generate(node : Var)
     if (@local_vars.find &.== node.name).nil?
       @local_vars << node.name
-      return "let #{node.name}"
+      return (@in_conditional ? "" : "let ") + node.name
     end
     node.name
   end
@@ -67,8 +68,80 @@ class CrystalScript::ExpressionGen
     raise UnsafeMethodError.new("Uninitialised variable declaration: #{node} in #{node.location}")
   end
 
+  def generate(node : NilLiteral)
+    "#{CrystalScript::GLOBAL_CLASS}.nil"
+  end
+
+  def generate(node : BoolLiteral)
+    node.false? ? "#{CrystalScript::GLOBAL_CLASS}.false" : "#{CrystalScript::GLOBAL_CLASS}.true"
+  end
+
+  def generate(node : If)
+    cvv = ConditionalVarVisitor.new
+    cvv.accept(node.cond)
+    declare = cvv.vars.empty? ? "" : String.build do |str|
+      str << "let "
+      cvv.vars[0...-1].each do |var|
+        str << var << ", "
+      end
+      str << cvv.vars[-1] << ";\n"
+    end
+
+    @in_conditional = true
+
+    if node.ternary?
+      result = declare + <<-IF
+      (#{generate(node.cond)}) ? (
+      #{generate(node.then)}
+      ) : (
+      #{generate(node.else)}
+      )
+      IF
+    else
+      result = declare + <<-IF
+      if (#{generate(node.cond)}) {
+      #{generate(node.then)}
+      } else {
+      #{generate(node.else)}
+      }
+      IF
+    end
+
+    @in_conditional = false
+    return result
+  end
+
+  def generate(node : Path)
+    CrystalScript.to_js_name(node)
+  end
+
+  def generate(node : IsA)
+    "(#{generate node.obj} instanceof #{generate node.const})"
+  end
+
+  def generate(node : Return)
+    return "" if (exp = node.exp).nil?
+    "return #{generate exp}"
+  end
+
+  def generate(node : ExpandableNode)
+    CrystalScript.logger.error("Unexpanded ExpandableNode: #{node} (#{node.class})")
+    return "undefined /* #{node.class} (ExpandableNode) */"
+  end
+
   def generate(node : ASTNode)
     CrystalScript.logger.warn("Unimplemented ASTNode #{node.class}")
     "undefined /* #{node.class} #{node} */"
+  end
+
+  private class ConditionalVarVisitor < Crystal::Visitor
+    getter vars = [] of String
+    def visit(node : Var)
+      @vars << node.name if @vars.find &.==(node.name).nil?
+    end
+    def visit(node : ASTNode)
+      node.accept_children(self)
+    end
+
   end
 end

@@ -1,7 +1,7 @@
 class CrystalScript
   def apply_include
     String.build do |str|
-      @ntv.in_mixin_order do |named_type|
+      @nto.in_mixin_order do |named_type|
         case named_type
         when FileModule
           # TODO. This case is used to avoid handling FileModule as other NamedType's
