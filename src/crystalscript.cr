@@ -28,13 +28,6 @@ class CrystalScript
     # TODO: generate symbol table
 
     @nto.visit(@program)
-    @nto.types.each do |tmp|
-      if tmp.full_name.starts_with? "Expand"
-        puts tmp
-        puts tmp.defs
-      end
-    end
-    exit 1
 
     code += init_named_types
     code += apply_include
@@ -145,4 +138,4 @@ puts ExpandTest.new.m
 PROGRAM
 
 result = CrystalScript.compile(source)
-# puts result
+puts result
