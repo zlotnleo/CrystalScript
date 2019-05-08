@@ -5,7 +5,7 @@ class CrystalScript
 
   def self.to_str_path(generic_instance_type : GenericInstanceType)
     names = self.to_str_path(generic_instance_type.generic_type)
-    names[-1] += "(" + generic_instance_type.type_vars.values.join(",") + ")"
+    names[-1] += "(" + generic_instance_type.type_vars.values.map(&.type?).join(",") + ")"
     return names
   end
 
