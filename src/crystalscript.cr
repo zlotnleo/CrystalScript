@@ -28,16 +28,9 @@ class CrystalScript
     # TODO: generate symbol table
 
     @nto.visit(@program)
-    @nto.types.each do |type|
-      if type.is_a? GenericType
-        CrystalScript.logger.info "#{type}: #{type.inherited}"
-      elsif type.is_a? GenericInstanceType
-        CrystalScript.logger.info "#{type}: #{type.generic_type.inherited}"
-      end
-    end
 
     code += init_named_types
-    # code += apply_include
+    code += apply_include
     # code += apply_extend
 
     code += Crustache.render Templates::INIT_LITERALS, nil

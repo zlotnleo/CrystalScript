@@ -67,7 +67,7 @@ module CrystalScript::Templates
   HAS_INSTANCE
 
   APPLY_INCLUDE = Crustache.parse <<-APPLY_INCLUDE
-  Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype{{#included_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/included_modules}});
+  Object.assign(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{#included_modules}}, #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/included_modules}});
 
   APPLY_INCLUDE
 
@@ -108,12 +108,4 @@ module CrystalScript::Templates
   CALL = Crustache.parse <<-CALL
   ($obj => $obj['{{{MethodName}}}'].call($obj,{{{HasBlock}}}{{#args}}, {value:({{{Value}}})}{{/args}}{{#named_args}}, {value:({{{Value}}}), name: {{{Name}}}}{{/named_args}}))({{{Object}}})
   CALL
-
-  AND = Crustache.parse <<-AND
-  (($left, $get_right) => #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}($left) ? $get_right() : $left)({{{Left}}}, () => ({{{Right}}}))
-  AND
-
-  OR = Crustache.parse <<-OR
-  (($left, $get_right) => #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}($left) ? $left : $get_right())({{{Left}}}, () => ({{{Right}}}))
-  OR
 end
