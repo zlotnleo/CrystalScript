@@ -3,8 +3,6 @@ require "crustache"
 module CrystalScript::Templates
   INIT_CRYSTALSCRIPT = Crustache.parse <<-INIT_CRYSTALSCRIPT
   const #{CrystalScript::GLOBAL_CLASS} = Object.create(null);
-  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} = function(){};
-  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS}.prototype = null;
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY} = v => !(v === #{CrystalScript::GLOBAL_CLASS}.nil || v === #{CrystalScript::GLOBAL_CLASS}.false);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::METHOD_CLASS} = class {
     constructor(funcs) { this.funcs = funcs; }
@@ -46,9 +44,8 @@ module CrystalScript::Templates
   INIT_LITERALS
 
   OBJECT_TYPE_DECLARATION = Crustache.parse <<-OBJECT_TYPE_DECLARATION
-  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::NULL_CLASS} {
+  #{CrystalScript::GLOBAL_CLASS}['Object'] = class {
     constructor() {
-      super();
       this.$instance_vars = Object.create(null);
     }
   };
@@ -56,15 +53,15 @@ module CrystalScript::Templates
   OBJECT_TYPE_DECLARATION
 
   TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
-  #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}} = class extends #{CrystalScript::GLOBAL_CLASS}.{{#has_superclass}}{{{SuperClass}}}{{/has_superclass}}{{^has_superclass}}#{CrystalScript::NULL_CLASS}{{/has_superclass}} {};
-  Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}} = class{{#has_superclass}} extends #{CrystalScript::GLOBAL_CLASS}{{#super_path}}['{{{Type}}}']{{/super_path}}{{/has_superclass}} {};
+  Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
 
   TYPE_DECLARATION
 
   HAS_INSTANCE = Crustache.parse <<-HAS_INSTANCE
   ((typeTag) => {
-    Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
-    #{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}.prototype[typeTag] = true;
+    Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
+    #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype[typeTag] = true;
   })(Symbol());
 
   HAS_INSTANCE

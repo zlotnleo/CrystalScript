@@ -1,10 +1,15 @@
 class CrystalScript::NamedTypeOrderer
-  getter types = Set(Crystal::NamedType).new
+  getter types = Set(Crystal::NamedType | GenericInstanceType).new
 
-  def visit(named_type : NamedType)
-    t = deinstantiate(named_type)
-    @types << t
-    named_type.types?.try &.values.each do |sub_t|
+  def visit(type : GenericType)
+    type.generic_types.values.reject(&.unbound?).each do |bound_instance_type|
+      visit bound_instance_type.as GenericInstanceType
+    end
+  end
+
+  def visit(type : NamedType | GenericInstanceType)
+    @types << type
+    type.types?.try &.values.each do |sub_t|
       visit sub_t
     end
   end
@@ -12,23 +17,15 @@ class CrystalScript::NamedTypeOrderer
   private class Vertex
     property? visited = false
     getter :type
-    def initialize(@type : NamedType)
+    def initialize(@type : Type)
     end
     def to_s(io)
       io << "Vertex(#{type})"
     end
   end
 
-  private def deinstantiate(t : GenericInstanceType)
-    t.generic_type
-  end
-
-  private def deinstantiate(t : Type)
-    t
-  end
-
   private def toposort(vertices, mapping, relation)
-    order = [] of NamedType
+    order = [] of Type
     vertices.each do |v|
       unless v.visited?
         toposort_visit(v, order, mapping, relation)
@@ -42,7 +39,6 @@ class CrystalScript::NamedTypeOrderer
     unless (nodes = relation.call(v.type)).nil?
       nodes.each do |p_type|
         unless p_type.nil?
-          p_type = deinstantiate(p_type)
           p_vertex = mapping[p_type]?
 
           if p_vertex.nil?
@@ -59,7 +55,7 @@ class CrystalScript::NamedTypeOrderer
   end
 
   def in_mixin_order(&block)
-    mapping = {} of NamedType => Vertex
+    mapping = {} of (NamedType | GenericInstanceType) => Vertex
     vertices = [] of Vertex
 
     @types.each do |t|
@@ -68,7 +64,7 @@ class CrystalScript::NamedTypeOrderer
       mapping[t] = v
     end
 
-    toposort(vertices, mapping, ->(t : NamedType){
+    toposort(vertices, mapping, ->(t : NamedType | GenericInstanceType){
       including_types = t.parents.dup || [] of Type
       including_types.delete t.superclass
       including_types
@@ -78,7 +74,7 @@ class CrystalScript::NamedTypeOrderer
   end
 
   def in_subclass_namespace_order(&block)
-    mapping = {} of NamedType => Vertex
+    mapping = {} of (NamedType | GenericInstanceType) => Vertex
     vertices = [] of Vertex
 
     @types.each do |t|
@@ -87,7 +83,7 @@ class CrystalScript::NamedTypeOrderer
       mapping[t] = v
     end
 
-    toposort(vertices, mapping, ->(t : NamedType){
+    toposort(vertices, mapping, ->(t : NamedType | GenericInstanceType){
       if (namespace = t.namespace).is_a? Program || namespace.is_a? FileModule
         [t.superclass]
       else

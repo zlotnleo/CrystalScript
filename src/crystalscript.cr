@@ -28,10 +28,17 @@ class CrystalScript
     # TODO: generate symbol table
 
     @nto.visit(@program)
+    @nto.types.each do |type|
+      if type.is_a? GenericType
+        CrystalScript.logger.info "#{type}: #{type.inherited}"
+      elsif type.is_a? GenericInstanceType
+        CrystalScript.logger.info "#{type}: #{type.generic_type.inherited}"
+      end
+    end
 
     code += init_named_types
-    code += apply_include
-    code += apply_extend
+    # code += apply_include
+    # code += apply_extend
 
     code += Crustache.render Templates::INIT_LITERALS, nil
 
@@ -41,7 +48,7 @@ class CrystalScript
 
   def self.compile(sources)
     compiler = Crystal::Compiler.new
-    # compiler.no_codegen = true
+    compiler.no_codegen = true
     compiler.no_cleanup = false
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, "out.js")
@@ -68,13 +75,13 @@ source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
 module Action
     module Move
         def move()
-            puts "move"
+            "move"
         end
     end
 
     module TakeOff
         def takeoff()
-            puts "takeoff"
+            "takeoff"
         end
     end
 end
@@ -132,8 +139,22 @@ class ExpandTest
   end
 end
 
-puts "Test"
-puts ExpandTest.new.m
+ExpandTest.new.m
+
+class NamedStuff
+  def test(a, b)
+  end
+end
+
+ns = NamedStuff.new
+ns.test 1, 2
+ns.test 1, b: 2
+ns.test a: 1, b: 2
+ns.test b: 2, a: 1
+
+def at_top_level
+end
+at_top_level
 
 PROGRAM
 
