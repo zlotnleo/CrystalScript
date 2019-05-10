@@ -9,6 +9,10 @@ class CrystalScript
             str << Crustache.render Templates::OBJECT_TYPE_DECLARATION, nil
           else
             superclass = named_type.superclass
+            if named_type.is_a? GenericType && superclass.is_a? GenericInstanceType
+              superclass = superclass.generic_type
+            end
+
             superclass_names = superclass.try { |sup| CrystalScript.to_str_path sup }
             model = {
               "path" => path,

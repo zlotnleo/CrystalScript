@@ -7,19 +7,18 @@ class CrystalScript
   ENV["CRYSTAL_PATH"] = "#{__DIR__}:#{ENV.fetch("CRYSTAL_PATH", `crystal env CRYSTAL_PATH`)}"
 
   GLOBAL_CLASS = "Crystal_Program"
-  METHOD_CLASS = "$Method"
   NULL_CLASS = "$NullClass"
   TRUTHY = "$truthy"
 
   getter program : Program
   getter node : ASTNode
-  @nto = NamedTypeOrderer.new
 
   @no_codegen = true
   @no_cleanup = false
   @prelude = "crs_prelude"
 
   def initialize(@program, @node)
+    @nto = NamedTypeOrderer.new(@program)
   end
 
   def generate
@@ -27,7 +26,7 @@ class CrystalScript
 
     # TODO: generate symbol table
 
-    @nto.visit(@program)
+    # @nto.visit(@program)
 
     code += init_named_types
     code += apply_include
@@ -65,89 +64,22 @@ class CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-module Action
-    module Move
-        def move()
-            "move"
-        end
-    end
-
-    module TakeOff
-        def takeoff()
-            "takeoff"
-        end
-    end
+class Foo(K, V)
 end
 
-abstract class Vehicle
-    include Action::Move
-    abstract def ready
-    def describe
-        "I'm a vehicle"
-    end
+class Bar(T) < Foo(T, Int32)
 end
 
-class Plane < Vehicle
-    include Action::TakeOff
+a = Bar(String).new
 
-    # property boarding_complete = false
-    @boarding_complete = false
-    def boarding_complete
-      @boarding_complete
-    end
-    def boarding_complete=(boarding_complete)
-      @boarding_complete = boarding_complete
-    end
+puts a.is_a? Bar                 # => true
+puts a.is_a? Bar(String)         # => true
+puts a.is_a? Bar(Int32)          # => false
 
-    def ready
-        boarding_complete
-    end
-
-    def describe
-        "I'm a plane"
-    end
-end
-
-module Test
-  extend Action::Move
-end
-
-module Mod
-  extend self
-
-  def method
-    "instance"
-  end
-
-  def self.method
-    "module"
-  end
-end
-
-class ExpandTest
-  def m
-    a, b = 3, 4
-    c = 5 && 8
-    "str"
-  end
-end
-
-ExpandTest.new.m
-
-class NamedStuff
-  def test(a, b)
-  end
-end
-
-ns = NamedStuff.new
-ns.test 1, 2
-ns.test 1, b: 2
-ns.test a: 1, b: 2
-ns.test b: 2, a: 1
-
-def at_top_level
-end
-at_top_level
+puts a.is_a? Foo                 # => true
+puts a.is_a? Foo(String, Int32)  # => true
+puts a.is_a? Foo(Int32, Int32)   # => false
+puts a.is_a? Foo(String, String) # => false
 
 PROGRAM
 
