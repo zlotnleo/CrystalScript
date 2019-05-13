@@ -26,9 +26,9 @@ class CrystalScript
 
     # TODO: generate symbol table
 
-    # @nto.visit(@program)
 
     code += init_named_types
+    code += set_instance
     code += apply_include
     # code += apply_extend
 
@@ -65,21 +65,29 @@ end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
 class Foo(K, V)
+  class SubFoo(T, U) < Foo(T, U)
+  end
 end
 
-class Bar(T) < Foo(T, Int32)
+class Bar(T) < Foo((Foo::SubFoo(T, String)|Nil), Int32)
 end
 
 a = Bar(String).new
 
-puts a.is_a? Bar                 # => true
-puts a.is_a? Bar(String)         # => true
-puts a.is_a? Bar(Int32)          # => false
+# puts a.is_a? Bar                 # => true
+# puts a.is_a? Bar(String)         # => true
+# puts a.is_a? Bar(Int32)          # => false
 
-puts a.is_a? Foo                 # => true
-puts a.is_a? Foo(String, Int32)  # => true
-puts a.is_a? Foo(Int32, Int32)   # => false
-puts a.is_a? Foo(String, String) # => false
+# puts a.is_a? Foo                 # => true
+# puts a.is_a? Foo(String, Int32)  # => true
+# puts a.is_a? Foo(Int32, Int32)   # => false
+# puts a.is_a? Foo(String, String) # => false
+
+
+class A(*T)
+end
+
+x = A(Int32, String, String, String, Int32).new
 
 PROGRAM
 

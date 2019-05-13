@@ -23,7 +23,6 @@ class CrystalScript
             }
             str << Crustache.render Templates::TYPE_DECLARATION, model
           end
-          str << Crustache.render Templates::HAS_INSTANCE, {"path" => path}
         else
           # TODO!
           str << "// Not implemented: " << named_type << " : " << named_type.class << "\n"

@@ -1,19 +1,53 @@
 class CrystalScript::NamedTypeOrderer
-  @all_types = Set(NamedType | GenericInstanceType).new
+  getter all_types = Set(NamedType | GenericInstanceType).new
+
 
   def initialize(program : Program)
     visit(program)
   end
 
+  def self.partially_unbound(type)
+    case type
+    when Nil
+      return false
+    when .unbound?
+      return true
+    when TypeSplat
+      return true
+    when VirtualType
+      return partially_unbound(type.base_type)
+    when UnionType
+      return type.union_types.any? do |union_type|
+        partially_unbound union_type
+      end
+    when TupleInstanceType
+      return type.tuple_types.any? do |tuple_type|
+        partially_unbound tuple_type
+      end
+    when NamedTupleInstanceType
+      return type.entries.map(&.type).any? do |named_tuple_type|
+        partially_unbound named_tuple_type
+      end
+    when GenericInstanceType
+      return type.type_vars.values.any? do |type_var|
+        partially_unbound type_var.type?
+      end
+    else
+      return false
+    end
+  end
+
   private def visit(type : Type)
-    if @all_types.add? type
-      visit (type.types?.try &.values)
-      if type.is_a? GenericType
-        visit type.generic_types.values.reject(&.unbound?)
-        # visit type.generic_types.values
-      elsif type.is_a? GenericInstanceType
-        visit type.parents.reject(&.unbound?)
-        # visit type.parents
+    unless NamedTypeOrderer.partially_unbound type
+      if @all_types.add? type
+        visit (type.types?.try &.values)
+        if type.is_a? GenericType
+          visit type.generic_types.values.reject(&.unbound?)
+          # visit type.generic_types.values
+        elsif type.is_a? GenericInstanceType
+          visit type.parents.reject(&.unbound?)
+          # visit type.parents
+        end
       end
     end
   end
@@ -63,9 +97,7 @@ class CrystalScript::NamedTypeOrderer
         unless p_type.nil?
           p_vertex = @mapping[p_type]?
           if p_vertex.nil?
-            CrystalScript.logger.error("Type #{p_type} was not visited!")
-            CrystalScript.logger.error("    bound: #{!p_type.unbound?} class: #{p_type.class}")
-            CrystalScript.logger.error("    following #{@label} relation from #{v.type} (bound: #{!v.type.unbound?} class: #{v.type.class})")
+            CrystalScript.logger.error("Type #{p_type} was not visited! following #{@label} relation from #{v.type.class} #{v.type}")
           elsif !p_vertex.visited?
             toposort_visit(p_vertex, order, relation)
           end
@@ -89,7 +121,7 @@ class CrystalScript::NamedTypeOrderer
         end
       end
       including_types
-    }).each do |t|
+    }, "mixin").each do |t|
       yield t
     end
   end
@@ -106,14 +138,18 @@ class CrystalScript::NamedTypeOrderer
         links << namespace
       end
       links
-    }).each do |t|
+    }, "namespace and subclass").each do |t|
       yield t
     end
   end
 
   def in_any_order(&block)
-    @all_types.each do |v|
-      yield v.type
+    @all_types.each do |t|
+      yield t
     end
+  end
+
+  def get_all_instances(type : GenericType)
+    @all_types.select { |instance_type| instance_type.is_a? GenericInstanceType && instance_type.generic_type == type }
   end
 end

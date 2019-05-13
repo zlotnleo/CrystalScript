@@ -32,6 +32,9 @@ module CrystalScript::Templates
   ((typeTag) => {
     Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}, Symbol.hasInstance, {value: instance => instance[typeTag]});
     #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype[typeTag] = true;
+    {{#generic_instances}}
+    #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype[typeTag] = true;
+    {{/generic_instances}}
   })(Symbol());
 
   HAS_INSTANCE
