@@ -103,13 +103,19 @@ class CrystalScript
   def define_instance_methods(named_type)
     String.build do |str|
       if named_type.is_a? DefInstanceContainer
-        CrystalScript.logger.info named_type
-        named_type.def_instances.each do |def_instance_key, a_def|
-          CrystalScript.logger.info "    #{a_def.name}"
-          CrystalScript.logger.info def_instance_key
-          CrystalScript.logger.info a_def
+        initialised_def_names = Set(String).new
+        named_type.def_instances.values.each do |a_def|
+          if initialised_def_names.add? a_def.name
+            str << Crustache.render Templates::INIT_INSTANCE_METHOD, {
+              "MethodName" => CrystalScript.get_method(a_def, include_args: false, include_class: true)
+            }
+          end
+
+          str << Crustache.render Templates::INSTANCE_METHOD, {
+            "MethodName" => CrystalScript.get_method(a_def, include_args: true, include_class: true),
+            "Body" => ExpressionGen.new.generate(a_def.body)
+          }
         end
-        CrystalScript.logger.info "\n"
       end
     end
   end

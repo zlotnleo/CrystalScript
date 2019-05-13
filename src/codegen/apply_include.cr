@@ -24,7 +24,7 @@ class CrystalScript
           end
 
           # Define instance methods on the type
-          # str << define_instance_methods(named_type)
+          str << define_instance_methods(named_type)
         else
           # TODO!
           str << "// Not implemented: " << named_type << " : " << named_type.class << "\n"

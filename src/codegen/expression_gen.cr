@@ -30,19 +30,11 @@ class CrystalScript::ExpressionGen
 
   def generate(node : Call)
     unless (obj=node.obj).nil?
-      model = {
+      return Crustache.render Templates::CALL, {
         "Object" => generate(obj),
-        "MethodName" => node.name,
-        "HasBlock" => node.block.nil? ? "false" : "true",
-        "args" => node.args.map do |arg| {
-          "Value" => generate(arg)
-        } end,
-        "named_args" => node.named_args.try &.map do |narg| {
-          "Value" => generate(narg.value),
-          "Name" => narg.name
-        } end
+        "MethodName" => CrystalScript.get_method(node.target_def, include_args: true, include_class: false),
+        "args" => nil,
       }
-      return Crustache.render Templates::CALL, model
     else
       "undefined /* TODO: obj-less call */"
     end
@@ -65,7 +57,9 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : UninitializedVar)
-    raise UnsafeMethodError.new("Uninitialised variable declaration: #{node} in #{node.location}")
+    "/* uninitialised variable! */"
+    CrystalScript.logger.warn "Uninitialised variable declaration: #{node} in #{node.location}"
+    # raise UnsafeMethodError.new("Uninitialised variable declaration: #{node} in #{node.location}")
   end
 
   def generate(node : NilLiteral)
@@ -111,8 +105,20 @@ class CrystalScript::ExpressionGen
     return result
   end
 
+  def generate(node : Generic)
+    Crustache.render Templates::CLASS, {
+      "path" => CrystalScript.to_str_path(node.name.as(Path)).map { |t|
+        { "Type" => t }
+      }
+    }
+  end
+
   def generate(node : Path)
-    CrystalScript.to_js_name(node)
+    Crustache.render Templates::CLASS, {
+      "path" => CrystalScript.to_str_path(node).map { |t|
+        { "Type" => t }
+      }
+    }
   end
 
   def generate(node : IsA)

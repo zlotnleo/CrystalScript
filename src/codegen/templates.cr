@@ -60,7 +60,27 @@ module CrystalScript::Templates
 
   CLASS_NEW
 
+  CLASS = Crustache.parse <<-CLASS
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}
+  CLASS
+
+  METHOD = Crustache.parse <<-METHOD
+  {{#class}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/class}}['{{{MethodName}}}']{{#include_args}}['{{#arg_types}}{{{Type}}},{{/arg_types}}']{{/include_args}}
+  METHOD
+
+  INIT_INSTANCE_METHOD = Crustache.parse <<-INIT_INSTANCE_METHOD
+  {{{MethodName}}} = Object.create(null);
+
+  INIT_INSTANCE_METHOD
+
+  INSTANCE_METHOD = Crustache.parse <<-INSTANCE_METHOD
+  {{{MethodName}}} = function(/*params*/) {
+  {{{Body}}}
+  };
+
+  INSTANCE_METHOD
+
   CALL = Crustache.parse <<-CALL
-  ($obj => $obj['{{{MethodName}}}'].call($obj,{{{HasBlock}}}{{#args}}, {value:({{{Value}}})}{{/args}}{{#named_args}}, {value:({{{Value}}}), name: {{{Name}}}}{{/named_args}}))({{{Object}}})
+  {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}){{/args}})
   CALL
 end

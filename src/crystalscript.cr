@@ -26,13 +26,14 @@ class CrystalScript
 
     # TODO: generate symbol table
 
-
     code += init_named_types
     code += set_instance
     code += apply_include
     # code += apply_extend
 
     code += Crustache.render Templates::INIT_LITERALS, nil
+
+    # CrystalScript.logger.info ExpressionGen.new.generate @node
 
     # code += generate(@node)
     code
@@ -45,6 +46,8 @@ class CrystalScript
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, "out.js")
     CrystalScript.new(result.program, result.node).generate
+  rescue ex
+    CrystalScript.logger.fatal ex
   end
 
   def self.from_file(filename, output_filename)
@@ -64,15 +67,49 @@ class CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
+puts 2 + 4
+
+class SimpleClass
+end
+
 class Foo(K, V)
   class SubFoo(T, U) < Foo(T, U)
   end
 end
 
 class Bar(T) < Foo((Foo::SubFoo(T, String)|Nil), Int32)
+
+  def method(arg : T)
+  end
+
+  def method(arg : Nil)
+  end
+
+  def method(x, y = 7, *args)
+  end
+
+  def method(arr : Bar)
+  end
 end
 
-a = Bar(String).new
+def test
+  sc = SimpleClass.new
+
+  a = Bar(String).new
+
+  a.method "Hello"
+  a.method nil
+  a.method x: 11
+  a.method x: "World"
+  a.method x: 1, y: 3
+  a.method y: 3, x: 1
+  a.method 1, 2, 3, 4, 5
+  a.method Bar(Int32).new
+  a.method Bar(String).new
+  a.method Bar(Int32 | String).new
+end
+
+test
 
 # puts a.is_a? Bar                 # => true
 # puts a.is_a? Bar(String)         # => true
@@ -84,10 +121,6 @@ a = Bar(String).new
 # puts a.is_a? Foo(String, String) # => false
 
 
-class A(*T)
-end
-
-x = A(Int32, String, String, String, Int32).new
 
 PROGRAM
 

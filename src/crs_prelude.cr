@@ -1,13 +1,5 @@
-require "prelude"
+require "primitives"
 
-# require "primitives"
-# lib LibCrystalMain
-#   @[Raises]
-#   fun __crystal_main(argc : Int32, argv : UInt8**)
-# end
-
-# fun main(argc : Int32, argv : UInt8**) : Int32
-#   LibCrystalMain.__crystal_main(argc, argv)
-#   0
-# end
-
+@[Primitive(:io)]
+def puts(*objs) : Nil
+end
