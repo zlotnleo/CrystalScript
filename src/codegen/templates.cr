@@ -45,7 +45,7 @@ module CrystalScript::Templates
   APPLY_INCLUDE
 
   APPLY_EXTEND = Crustache.parse <<-APPLY_EXTEND
-  Object.assign(#{CrystalScript::GLOBAL_CLASS}.{{{TypeName}}}{{#extended_modules}}, #{CrystalScript::GLOBAL_CLASS}.{{{Module}}}.prototype{{/extended_modules}})
+  Object.assign(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#extended_modules}}, #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/extended_modules}})
 
   APPLY_EXTEND
 
@@ -65,20 +65,20 @@ module CrystalScript::Templates
   CLASS
 
   METHOD = Crustache.parse <<-METHOD
-  {{#class}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/class}}['{{{MethodName}}}']{{#include_args}}['{{#arg_types}}{{{Type}}},{{/arg_types}}']{{/include_args}}
+  {{#class}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#instance_method}}.prototype{{/instance_method}}{{/class}}['{{{MethodName}}}']{{#include_args}}['{{#arg_types}}{{{Type}}},{{/arg_types}}']{{/include_args}}
   METHOD
 
-  INIT_INSTANCE_METHOD = Crustache.parse <<-INIT_INSTANCE_METHOD
+  INIT_METHOD = Crustache.parse <<-INIT_METHOD
   {{{MethodName}}} = Object.create(null);
 
-  INIT_INSTANCE_METHOD
+  INIT_METHOD
 
-  INSTANCE_METHOD = Crustache.parse <<-INSTANCE_METHOD
+  DEFINE_METHOD = Crustache.parse <<-DEFINE_METHOD
   {{{MethodName}}} = function(/*params*/) {
   {{{Body}}}
   };
 
-  INSTANCE_METHOD
+  DEFINE_METHOD
 
   CALL = Crustache.parse <<-CALL
   {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}){{/args}})

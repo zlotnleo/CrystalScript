@@ -32,12 +32,19 @@ class CrystalScript::ExpressionGen
     unless (obj=node.obj).nil?
       return Crustache.render Templates::CALL, {
         "Object" => generate(obj),
-        "MethodName" => CrystalScript.get_method(node.target_def, include_args: true, include_class: false),
+        "MethodName" => CrystalScript.get_method(node.target_def, include_args: true, include_class: false, is_instance: true), #TODO set is_instance
         "args" => nil,
       }
     else
       "undefined /* TODO: obj-less call */"
     end
+  rescue ex
+    if (ex.message.try &.match(/^((Zero)|\d+) target defs for/)).nil?
+      raise ex
+    else
+      CrystalScript.logger.warn ex
+    end
+    return ""
   end
 
   def generate(node : InstanceVar)

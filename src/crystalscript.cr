@@ -17,37 +17,34 @@ class CrystalScript
   @no_cleanup = false
   @prelude = "crs_prelude"
 
-  def initialize(@program, @node)
+  def initialize(@program, @node, @output : IO)
     @nto = NamedTypeOrderer.new(@program)
   end
 
   def generate
-    code = Crustache.render Templates::INIT_CRYSTALSCRIPT, nil
+    @output << Crustache.render Templates::INIT_CRYSTALSCRIPT, nil
 
     # TODO: generate symbol table
 
-    code += init_named_types
-    code += set_instance
-    code += apply_include
-    # code += apply_extend
+    init_named_types
+    set_instance
+    apply_include
+    define_instance_methods
+    apply_extend
+    define_class_methods
 
-    code += Crustache.render Templates::INIT_LITERALS, nil
-
-    # CrystalScript.logger.info ExpressionGen.new.generate @node
-
-    # code += generate(@node)
-    code
+    @output << Crustache.render Templates::INIT_LITERALS, nil
   end
 
-  def self.compile(sources)
+  def self.compile(sources, output)
     compiler = Crystal::Compiler.new
     compiler.no_codegen = true
     compiler.no_cleanup = false
     compiler.prelude = "crs_prelude"
-    result = compiler.compile(sources, "out.js")
-    CrystalScript.new(result.program, result.node).generate
-  rescue ex
-    CrystalScript.logger.fatal ex
+    result = compiler.compile(sources, "")
+    CrystalScript.new(result.program, result.node, output).generate
+  # rescue ex
+  #   CrystalScript.logger.fatal ex
   end
 
   def self.from_file(filename, output_filename)
@@ -120,9 +117,51 @@ test
 # puts a.is_a? Foo(Int32, Int32)   # => false
 # puts a.is_a? Foo(String, String) # => false
 
+module M11
+  def method1
+  end
+end
 
+module M12
+  def method2
+  end
+end
+
+module M2
+  extend M11
+  extend M12
+end
+
+class C
+  include M11
+  include M12
+end
+C.new.method1
+C.new.method2
+
+module GenericModule(T)
+  def id_t(t : T)
+    t
+  end
+
+  def id(u : U) forall U
+    u
+  end
+end
+
+class GenericClass(T)
+  include GenericModule(T)
+end
+
+def call
+  gc = GenericClass(Int32).new
+  puts gc.id_t(4)
+  puts gc.id(11)
+  puts gc.id("world")
+end
+
+call
 
 PROGRAM
 
-result = CrystalScript.compile(source)
-puts result
+CrystalScript.compile(source, STDOUT)
