@@ -3,7 +3,7 @@ jobs: # a collection of jobs
   build: 
     working_directory: ~/CrystalScript
     docker: # run build steps with docker
-      - image: crystallang/crystal:0.27.0 # primary docker container; all `steps` will run here.
+      - image: crystallang/crystal:0.28.0 # primary docker container; all `steps` will run here.
     steps:
       - checkout
       - run: apt-get update
@@ -14,7 +14,7 @@ jobs: # a collection of jobs
           name: install NodeJS
           command: |
             apt-get install curl --yes
-            curl -sL https://deb.nodesource.com/setup_11.x | bash -
+            curl -sL https://deb.nodesource.com/setup_12.x | bash -
             apt-get install nodejs --yes
       - run: ./create_VERSION.sh
       - run:
