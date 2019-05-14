@@ -9,6 +9,7 @@ class CrystalScript
   GLOBAL_CLASS = "Crystal_Program"
   NULL_CLASS = "$NullClass"
   TRUTHY = "$truthy"
+  IS_A = "$is_a"
 
   getter program : Program
   getter node : ASTNode
@@ -107,15 +108,6 @@ def test
 end
 
 test
-
-# puts a.is_a? Bar                 # => true
-# puts a.is_a? Bar(String)         # => true
-# puts a.is_a? Bar(Int32)          # => false
-
-# puts a.is_a? Foo                 # => true
-# puts a.is_a? Foo(String, Int32)  # => true
-# puts a.is_a? Foo(Int32, Int32)   # => false
-# puts a.is_a? Foo(String, String) # => false
 
 module M11
   def method1

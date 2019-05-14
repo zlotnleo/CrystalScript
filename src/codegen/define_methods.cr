@@ -22,7 +22,10 @@ class CrystalScript
           if instance || a_def.name != "allocate"
             @output << Crustache.render Templates::DEFINE_METHOD, {
               "MethodName" => CrystalScript.get_method(named_type, a_def, include_args: true, is_instance: instance),
-              "Body" => ExpressionGen.new.generate(a_def.body)
+              "args" => a_def.args.map { |arg|
+                { "Arg" => arg.name }
+              },
+              "Body" => ExpressionGen.new(a_def.vars.try &.values.reject(&.assigned_to?).map(&.name)).generate(a_def.body)
             }
           else
             @output << Crustache.render Templates::ALLOCATE, {

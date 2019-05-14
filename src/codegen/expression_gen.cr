@@ -8,8 +8,8 @@ class CrystalScript::ExpressionGen
   def initialize
   end
 
-  def initialize(func_args)
-    @local_vars += func_args
+  def initialize(func_args : Array(String)?)
+    @local_vars += func_args unless func_args.nil?
   end
 
   def generate(node : Nop)
@@ -33,13 +33,15 @@ class CrystalScript::ExpressionGen
       return Crustache.render Templates::CALL, {
         "Object" => generate(obj),
         "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
-        "args" => nil,
+        "args" => node.args.map { |arg|
+          { "Arg" => generate(arg) }
+        },
       }
     else
       "undefined /* TODO: obj-less call #{node} */"
     end
   rescue ex
-    if (ex.message.try &.match(/^((Zero)|\d+) target defs for/)).nil?
+    if (ex.message.try &.match(/^Zero target defs for/)).nil?
       raise ex
     else
       CrystalScript.logger.warn ex
@@ -75,6 +77,34 @@ class CrystalScript::ExpressionGen
 
   def generate(node : BoolLiteral)
     node.false? ? "#{CrystalScript::GLOBAL_CLASS}.false" : "#{CrystalScript::GLOBAL_CLASS}.true"
+  end
+
+  def generate(node : TupleLiteral)
+    Crustache.render Templates::TUPLE_LITERAL, {
+      "type_args" => node.elements.map_with_index { |elt, i|
+        {
+          "Type" => CrystalScript.to_str_path(elt.type?).try(&.join "::"),
+          "last" => i == node.elements.size - 1
+        }
+      },
+      "values" => node.elements.map { |elt|
+        { "Value" => generate(elt) }
+      }
+    }
+  end
+
+  def generate(node : NumberLiteral)
+    Crustache.render Templates::SIMPLE_LITERAL, {
+      "Type" => CrystalScript.get_number_class(node.kind),
+      "Value" => node.value
+    }
+  end
+
+  def generate(node : StringLiteral)
+    Crustache.render Templates::SIMPLE_LITERAL, {
+      "Type" => "String",
+      "Value" => "\"#{node.value}\""
+    }
   end
 
   def generate(node : If)
@@ -134,11 +164,11 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : IsA)
-    "(#{generate node.obj} instanceof #{generate node.const})"
+    "(#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::IS_A}(#{generate node.obj},#{generate node.const}))"
   end
 
   def generate(node : Return)
-    return "" if (exp = node.exp).nil?
+    return "return" if (exp = node.exp).nil?
     "return #{generate exp}"
   end
 

@@ -4,7 +4,7 @@ module CrystalScript::Templates
   INIT_CRYSTALSCRIPT = Crustache.parse <<-INIT_CRYSTALSCRIPT
   const #{CrystalScript::GLOBAL_CLASS} = Object.create(null);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY} = v => !(v === #{CrystalScript::GLOBAL_CLASS}.nil || v === #{CrystalScript::GLOBAL_CLASS}.false);
-
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::IS_A} = (obj, type) => obj instanceof type ? #{CrystalScript::GLOBAL_CLASS}.true : #{CrystalScript::GLOBAL_CLASS}.false;
   INIT_CRYSTALSCRIPT
 
   INIT_LITERALS = Crustache.parse <<-INIT_LITERALS
@@ -74,7 +74,7 @@ module CrystalScript::Templates
   INIT_METHOD
 
   DEFINE_METHOD = Crustache.parse <<-DEFINE_METHOD
-  {{{MethodName}}} = function(/*params*/) {
+  {{{MethodName}}} = function({{#args}}{{{Arg}}},{{/args}}) {
   {{{Body}}}
   };
 
@@ -88,6 +88,22 @@ module CrystalScript::Templates
   ALLOCATE
 
   CALL = Crustache.parse <<-CALL
-  {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}){{/args}})
+  {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}),{{/args}})
   CALL
+
+  TUPLE_LITERAL = Crustache.parse <<-TUPLE_LITERAL
+  (() => {
+    let _ = new #{CrystalScript::GLOBAL_CLASS}['Tuple({{#type_args}}{{{Type}}}{{^last}},{{/last}}{{/type_args}})'];
+    _.$value = [{{#values}}{{Value}},{{/values}}];
+    return _;
+  })()
+  TUPLE_LITERAL
+
+  SIMPLE_LITERAL = Crustache.parse <<-SIMPLE_LITERAL
+  (() => {
+    let _ = new #{CrystalScript::GLOBAL_CLASS}['{{{Type}}}'];
+    _.$value = {{{Value}}};
+    return _;
+  })()
+  SIMPLE_LITERAL
 end

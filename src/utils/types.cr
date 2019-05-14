@@ -5,28 +5,15 @@ class CrystalScript
     when :i16 then return "Int16"
     when :i32 then return "Int32"
     when :i64 then return "Int64"
+    when :i128 then return "Int128"
     when :u8 then return "UInt8"
     when :u16 then return "UInt16"
     when :u32 then return "UInt32"
     when :u64 then return "UInt64"
+    when :u128 then return "UInt128"
     when :f32 then return "Float32"
     when :f64 then return "Float64"
     else raise ArgumentError.new("Unrecognised number kind #{kind}")
     end
-  end
-
-  def self.get_primitive_js_class(class_name, kind = nil)
-    if class_name <= Number
-      js_class_name = self.get_number_class(kind)
-    elsif class_name == String
-      js_class_name = "String"
-    elsif class_name == Bool
-      js_class_name = "Bool"
-    elsif class_name == Nil
-      js_class_name = "Nil"
-    else
-      raise NotImplementedError.new("Unknown primitive class #{class_name}")
-    end
-    return CrystalScript::GLOBAL_CLASS + "." + js_class_name
   end
 end
