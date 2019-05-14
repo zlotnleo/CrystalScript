@@ -46,7 +46,7 @@ def run_test(filename)
   # wait_or_timeout(proc, 2.seconds)
 
   js_in = File.tempfile("js_in")
-  js_in << CrystalScript.from_file(crystal_in_path, "irrelevant")
+  CrystalScript.from_file(crystal_in_path, js_in)
 
   js_in.close # This (or .rewind) is necessary 😧
 

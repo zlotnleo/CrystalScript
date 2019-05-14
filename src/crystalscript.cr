@@ -48,9 +48,9 @@ class CrystalScript
     CrystalScript.logger.fatal ex
   end
 
-  def self.from_file(filename, output_filename)
+  def self.from_file(filename, output)
     source = Crystal::Compiler::Source.new filename, File.read(filename)
-    compile(source, output_filename)
+    compile(source, output)
   end
 
   class CodeGen
