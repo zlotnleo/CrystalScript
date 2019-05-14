@@ -44,8 +44,8 @@ class CrystalScript
     compiler.prelude = "crs_prelude"
     result = compiler.compile(sources, "")
     CrystalScript.new(result.program, result.node, output).generate
-  # rescue ex
-  #   CrystalScript.logger.fatal ex
+  rescue ex
+    CrystalScript.logger.fatal ex
   end
 
   def self.from_file(filename, output_filename)
@@ -65,94 +65,30 @@ class CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-puts 2 + 4
+class Test
+  def method
+    from_inside
+  end
 
-class SimpleClass
-end
+  def from_inside
+    puts "inside"
+  end
 
-class Foo(K, V)
-  class SubFoo(T, U) < Foo(T, U)
+  def self.class_method
+    class_from_inside
+  end
+
+  def self.class_from_inside
+    puts "class inside"
   end
 end
 
-class Bar(T) < Foo((Foo::SubFoo(T, String)|Nil), Int32)
-
-  def method(arg : T)
-  end
-
-  def method(arg : Nil)
-  end
-
-  def method(x, y = 7, *args)
-  end
-
-  def method(arr : Bar)
-  end
+def run
+  Test.new.method
+  Test.class_method
 end
 
-def test
-  sc = SimpleClass.new
-
-  a = Bar(String).new
-
-  a.method "Hello"
-  a.method nil
-  a.method x: 11
-  a.method x: "World"
-  a.method x: 1, y: 3
-  a.method y: 3, x: 1
-  a.method 1, 2, 3, 4, 5
-  a.method Bar(Int32).new
-  a.method Bar(String).new
-  a.method Bar(Int32 | String).new
-end
-
-test
-
-module M11
-  def method1
-  end
-end
-
-module M12
-  def method2
-  end
-end
-
-module M2
-  extend M11
-  extend M12
-end
-
-class C
-  include M11
-  include M12
-end
-C.new.method1
-C.new.method2
-
-module GenericModule(T)
-  def id_t(t : T)
-    t
-  end
-
-  def id(u : U) forall U
-    u
-  end
-end
-
-class GenericClass(T)
-  include GenericModule(T)
-end
-
-def call
-  gc = GenericClass(Int32).new
-  puts gc.id_t(4)
-  puts gc.id(11)
-  puts gc.id("world")
-end
-
-call
+run
 
 PROGRAM
 

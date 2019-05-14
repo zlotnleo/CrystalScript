@@ -29,16 +29,43 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Call)
+    owner = node.target_def.owner
     unless (obj=node.obj).nil?
-      return Crustache.render Templates::CALL, {
-        "Object" => generate(obj),
-        "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
-        "args" => node.args.map { |arg|
-          { "Arg" => generate(arg) }
-        },
-      }
+      if !owner.is_a? MetaclassType && !owner.is_a? VirtualMetaclassType && !owner.is_a? GenericModuleInstanceMetaclassType && !owner.is_a? GenericClassInstanceMetaclassType
+        return Crustache.render Templates::CALL_ON_OBJ, {
+          "Object" => generate(obj),
+          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
+          "args" => node.args.map { |arg|
+            { "Arg" => generate(arg) }
+          },
+        }
+      else
+        return Crustache.render Templates::CALL, {
+          "Object" => generate(obj),
+          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
+          "args" => node.args.map { |arg|
+            { "Arg" => generate(arg) }
+          },
+        }
+      end
     else
-      "undefined /* TODO: obj-less call #{node} */"
+      if owner == node.scope? && !owner.is_a? MetaclassType && !owner.is_a? VirtualMetaclassType && !owner.is_a? GenericModuleInstanceMetaclassType && !owner.is_a? GenericClassInstanceMetaclassType
+        return Crustache.render Templates::CALL_ON_OBJ, {
+          "Object" => "this",
+          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
+          "args" => node.args.map { |arg|
+            { "Arg" => generate(arg) }
+          },
+        }
+      else
+        return Crustache.render Templates::CALL, {
+          "Object" => "",
+          "MethodName" => CrystalScript.get_method(owner, node.target_def, include_args: true, is_instance: nil),
+          "args" => node.args.map { |arg|
+            { "Arg" => generate(arg) }
+          },
+        }
+      end
     end
   rescue ex
     if (ex.message.try &.match(/^Zero target defs for/)).nil?

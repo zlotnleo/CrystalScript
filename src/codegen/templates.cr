@@ -87,6 +87,10 @@ module CrystalScript::Templates
 
   ALLOCATE
 
+  CALL_ON_OBJ = Crustache.parse <<-CALL_ON_OBJ
+  ($obj => $obj{{{MethodName}}}.call($obj{{#args}},({{{Arg}}}){{/args}}))({{{Object}}})
+  CALL_ON_OBJ
+
   CALL = Crustache.parse <<-CALL
   {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}),{{/args}})
   CALL
