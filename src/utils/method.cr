@@ -1,11 +1,11 @@
 class CrystalScript
-  def self.get_method(a_def : Def, *, include_args, include_class, is_instance)
-    klass = is_instance ? a_def.owner : a_def.owner.instance_type
+  def self.get_method(type : Type?, a_def : Def, *, include_args, is_instance)
+    type = type.instance_type unless is_instance || type.nil?
     Crustache.render Templates::METHOD, {
-      "class" => if include_class
+      "class" => if !type.nil?
         {
           "instance_method" => is_instance,
-          "path" => CrystalScript.to_str_path(klass).map { |t| {"Type" => t} }
+          "path" => CrystalScript.to_str_path(type).map { |t| {"Type" => t} }
         }
         else
          false

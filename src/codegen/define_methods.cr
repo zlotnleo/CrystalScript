@@ -15,14 +15,22 @@ class CrystalScript
         named_type.def_instances.values.each do |a_def|
           if initialised_def_names.add? a_def.name
             @output << Crustache.render Templates::INIT_METHOD, {
-              "MethodName" => CrystalScript.get_method(a_def, include_args: false, include_class: true, is_instance: instance)
+              "MethodName" => CrystalScript.get_method(named_type, a_def, include_args: false, is_instance: instance)
             }
           end
-          CrystalScript.logger.info a_def
-          @output << Crustache.render Templates::DEFINE_METHOD, {
-            "MethodName" => CrystalScript.get_method(a_def, include_args: true, include_class: true, is_instance: instance),
-            "Body" => ExpressionGen.new.generate(a_def.body)
-          }
+
+          if instance || a_def.name != "allocate"
+            @output << Crustache.render Templates::DEFINE_METHOD, {
+              "MethodName" => CrystalScript.get_method(named_type, a_def, include_args: true, is_instance: instance),
+              "Body" => ExpressionGen.new.generate(a_def.body)
+            }
+          else
+            @output << Crustache.render Templates::ALLOCATE, {
+              "path" => CrystalScript.to_str_path(named_type.instance_type).try &.map { |t|
+                { "Type" => t }
+              }
+            }
+          end
         end
       end
     end

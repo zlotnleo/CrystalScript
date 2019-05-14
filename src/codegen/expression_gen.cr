@@ -32,11 +32,11 @@ class CrystalScript::ExpressionGen
     unless (obj=node.obj).nil?
       return Crustache.render Templates::CALL, {
         "Object" => generate(obj),
-        "MethodName" => CrystalScript.get_method(node.target_def, include_args: true, include_class: false, is_instance: true), #TODO set is_instance
+        "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
         "args" => nil,
       }
     else
-      "undefined /* TODO: obj-less call */"
+      "undefined /* TODO: obj-less call #{node} */"
     end
   rescue ex
     if (ex.message.try &.match(/^((Zero)|\d+) target defs for/)).nil?
@@ -113,8 +113,13 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Generic)
+
+    if (type = node.type?).is_a? MetaclassType || type.is_a? VirtualMetaclassType || type.is_a? GenericModuleInstanceMetaclassType || type.is_a? GenericClassInstanceMetaclassType
+      type = type.try &.instance_type
+    end
+
     Crustache.render Templates::CLASS, {
-      "path" => CrystalScript.to_str_path(node.name.as(Path)).map { |t|
+      "path" => CrystalScript.to_str_path(type).try &.map { |t|
         { "Type" => t }
       }
     }

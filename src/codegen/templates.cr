@@ -80,6 +80,13 @@ module CrystalScript::Templates
 
   DEFINE_METHOD
 
+  ALLOCATE = Crustache.parse <<-ALLOCATE
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}['allocate'][''] = function() {
+    return new #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}();
+  };
+
+  ALLOCATE
+
   CALL = Crustache.parse <<-CALL
   {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}){{/args}})
   CALL

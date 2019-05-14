@@ -1,7 +1,13 @@
 class CrystalScript
-  def self.to_str_path(metaclass_type : MetaclassType | VirtualMetaclassType | GenericModuleInstanceMetaclassType | GenericClassInstanceMetaclassType)
-    [(self.to_str_path metaclass_type.instance_type).join("::") + ".class"]
+  macro metaclass_handlers(types)
+    {% for type in types %}
+      def self.to_str_path(metaclass_type : {{type}})
+        [(self.to_str_path metaclass_type.instance_type).join("::") + ".class"]
+      end
+    {% end %}
   end
+
+  metaclass_handlers [MetaclassType, VirtualMetaclassType, GenericModuleInstanceMetaclassType, GenericClassInstanceMetaclassType]
 
   def self.to_str_path(union_type : UnionType)
     ["(" + union_type.union_types.map { |sub_t| (self.to_str_path sub_t).join("::") }.join("|") + ")"]
