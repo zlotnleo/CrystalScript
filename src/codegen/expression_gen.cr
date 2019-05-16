@@ -21,7 +21,6 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Expressions)
-    CrystalScript.logger.info node.expressions
     if node.expressions.empty?
       return ""
     end
@@ -88,7 +87,21 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : InstanceVar)
-    "self.$instance_vars['#{node.name}']"
+    "this.$instance_vars['#{node.name}']"
+  end
+
+  def generate(node : ClassVar)
+    unless (var = node.var?).nil?
+      type_s = Crustache.render Templates::CLASS, {
+        "path" => CrystalScript.to_str_path(var.owner).map { |t|
+          {"Type" => t}
+        }
+      }
+      "#{type_s}.$class_vars['#{node.name}']"
+    else
+      CrystalScript.logger.warn "ClassVar without a var: #{node}"
+      ""
+    end
   end
 
   def generate(node : Assign)

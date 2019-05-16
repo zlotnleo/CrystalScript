@@ -27,9 +27,15 @@ module CrystalScript::Templates
   TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
   #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}} = class{{#has_superclass}} extends #{CrystalScript::GLOBAL_CLASS}{{#super_path}}['{{{Type}}}']{{/super_path}}{{/has_superclass}} {};
   Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
-  {{#has_class_vars}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.$class_vars = Object.create(null);{{/has_class_vars}}
 
   TYPE_DECLARATION
+
+  CLASS_VARS = Crustache.parse <<-CLASS_VARS
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.$class_vars = Object.create(null);
+  {{#initialisers}}
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.$class_vars['{{{Name}}}'] = {{{Value}}};
+  {{/initialisers}}
+  CLASS_VARS
 
   HAS_INSTANCE = Crustache.parse <<-HAS_INSTANCE
   ((typeTag) => {

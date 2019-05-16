@@ -11,17 +11,26 @@ class CrystalScript
           if named_type.is_a? GenericType && superclass.is_a? GenericInstanceType
             superclass = superclass.generic_type
           end
-
           superclass_names = superclass.try { |sup| CrystalScript.to_str_path sup }
-          model = {
+          @output << Crustache.render Templates::TYPE_DECLARATION, {
             "path" => path,
             "DisplayName" => names.join("::"),
             "has_superclass" => superclass_names.nil? ? false : {
               "super_path" => superclass_names.map { |name| {"Type" => name} }
             },
-            "has_class_vars" => named_type.is_a? ClassVarContainer
           }
-          @output << Crustache.render Templates::TYPE_DECLARATION, model
+          if named_type.is_a? ClassVarContainer
+            @output << Crustache.render Templates::CLASS_VARS, {
+              "path" => path,
+              "initialisers" => named_type.class_vars.values.reject(&.initializer.nil?).map { |var|
+                initializer = var.initializer.not_nil!
+                {
+                  "Name" => initializer.name,
+                  "Value" => ExpressionGen.new.generate initializer.node
+                }
+              }
+            }
+          end
         end
       else
         # TODO!

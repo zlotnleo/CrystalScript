@@ -90,11 +90,29 @@ def while_loop
   end
 end
 
+class WithClassVars
+  @@instance_count = 0
+
+  def self.instance_count
+    @@instance_count
+  end
+
+  def initialize
+    @@instance_count += 1
+  end
+end
+
 def main
   ClassName.new.method_name
   while_loop
   method 1
   method "one"
+
+  puts WithClassVars.instance_count
+  WithClassVars.new
+  WithClassVars.new
+  WithClassVars.new
+  puts WithClassVars.instance_count
 end
 
 PROGRAM
