@@ -28,6 +28,8 @@ module CrystalScript::PrimitiveGen
     case op
     when "<"  then return "((#{js_p1}).$value < (#{js_p2}).$value ? #{CrystalScript::GLOBAL_CLASS}.true : #{CrystalScript::GLOBAL_CLASS}.false)"
     when "+"  then return "#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::SIMPLE_LITERAL}(#{CrystalScript::GLOBAL_CLASS}['Int32'], (#{js_p1}).$value + (#{js_p2}).$value)"
+    when "-"  then return "#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::SIMPLE_LITERAL}(#{CrystalScript::GLOBAL_CLASS}['Int32'], (#{js_p1}).$value - (#{js_p2}).$value)"
+    when "==" then return "((#{js_p1}).$value === (#{js_p2}).$value ? #{CrystalScript::GLOBAL_CLASS}.true : #{CrystalScript::GLOBAL_CLASS}.false)"
     else  CrystalScript.logger.error "Unimplemented #{t1} #{op} #{t2}"
     end
   end

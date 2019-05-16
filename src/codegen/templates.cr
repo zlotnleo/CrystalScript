@@ -6,6 +6,7 @@ module CrystalScript::Templates
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY} = v => !(v === #{CrystalScript::GLOBAL_CLASS}.nil || v === #{CrystalScript::GLOBAL_CLASS}.false);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::IS_A} = (obj, type) => obj instanceof type ? #{CrystalScript::GLOBAL_CLASS}.true : #{CrystalScript::GLOBAL_CLASS}.false;
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::SIMPLE_LITERAL} = (type, v) => { let _ = new type; _.$value = v; return _; };
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::RETURN_EXCEPTION} = function(value) { this.value = value; };
 
   INIT_CRYSTALSCRIPT
 

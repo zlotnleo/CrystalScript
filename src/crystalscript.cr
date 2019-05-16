@@ -11,6 +11,7 @@ class CrystalScript
   TRUTHY = "$truthy"
   IS_A = "$is_a"
   SIMPLE_LITERAL = "$literal"
+  RETURN_EXCEPTION = "$return"
 
   getter program : Program
   getter node : ASTNode
@@ -66,55 +67,63 @@ class CrystalScript
   end
 end
 
-source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-class ClassName
-  def method_name
-    puts 3
-  end
-end
+CrystalScript.from_file(ARGV[0], STDOUT)
 
-def method(x)
-  case x
-  when Int32
-    puts "number"
-  when String
-    puts "string"
-  end
-end
+# source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
+# class ClassName
+#   def method_name
+#     puts 3
+#   end
+# end
 
-def while_loop
-  i = 0
-  while i < 10
-    i += 1
-    puts i
-  end
-end
+# def method(x)
+#   case x
+#   when Int32
+#     puts "number"
+#   when String
+#     puts "string"
+#   end
+# end
 
-class WithClassVars
-  @@instance_count = 0
+# def while_loop
+#   i = 0
+#   while i < 10
+#     i += 1
+#     puts i
+#   end
+# end
 
-  def self.instance_count
-    @@instance_count
-  end
+# class Counter
+#   @@count = 0
 
-  def initialize
-    @@instance_count += 1
-  end
-end
+#   def self.increase_count
+#     @@count += 1
+#   end
 
-def main
-  ClassName.new.method_name
-  while_loop
-  method 1
-  method "one"
+#   def self.get_count
+#     @@count
+#   end
+# end
 
-  puts WithClassVars.instance_count
-  WithClassVars.new
-  WithClassVars.new
-  WithClassVars.new
-  puts WithClassVars.instance_count
-end
+# class InstanceCounter < Counter
+#   def initialize
+#     InstanceCounter.increase_count
+#   end
+# end
 
-PROGRAM
+# def main
+#   ClassName.new.method_name
+#   while_loop
+#   method 1
+#   method "one"
 
-CrystalScript.compile(source, STDOUT)
+#   puts InstanceCounter.get_count
+#   InstanceCounter.new
+#   InstanceCounter.new
+#   InstanceCounter.new
+#   puts InstanceCounter.get_count
+# end
+
+# PROGRAM
+
+# CrystalScript.compile(source, STDOUT)

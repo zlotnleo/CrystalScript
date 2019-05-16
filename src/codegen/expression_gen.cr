@@ -2,9 +2,6 @@ class CrystalScript::ExpressionGen
   class UnsafeMethodError < Exception
   end
 
-  def initialize()
-  end
-
   # Only generates the method body
   def generate(node : Def)
     String.build do |str|
@@ -12,7 +9,21 @@ class CrystalScript::ExpressionGen
       unless local_vars.nil? || local_vars.empty?
         str << "let " << local_vars.join(",") << ";\n"
       end
-      str << "return " << generate(node.body) << ";"
+      str << <<-DEF
+      try {
+        return #{generate node.body};
+      } catch($err) {
+        if ($err instanceof #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::RETURN_EXCEPTION}) {
+          return $err.value;
+        } else {
+          throw $err;
+        }
+      }
+      DEF
+      str << "try {"
+
+      str << "} catch(err) {
+      }"
     end
   end
 
@@ -168,12 +179,21 @@ class CrystalScript::ExpressionGen
       end
     else
       <<-IF
-      (#{generate(node.cond)}) ? (
-      #{generate(node.then)}
-      ) : (
-      #{generate(node.else)}
-      )
+      (() => {
+        if (#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}(#{generate node.cond})) {
+          return #{generate node.then};
+        } else {
+          return #{generate node.else};
+        }
+      })()
       IF
+      # <<-IF
+      # (#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}(#{generate node.cond})) ? (
+      # #{generate(node.then)}
+      # ) : (
+      # #{generate(node.else)}
+      # )
+      # IF
     end
   end
 
@@ -203,8 +223,8 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Return)
-    return "return" if (exp = node.exp).nil?
-    "return #{generate exp}"
+    value = (exp = node.exp).nil? ? "#{CrystalScript::GLOBAL_CLASS}.nil" : generate exp
+    "(() => { throw new #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::RETURN_EXCEPTION}(#{value}); })()"
   end
 
   def generate(node : ExpandableNode)
