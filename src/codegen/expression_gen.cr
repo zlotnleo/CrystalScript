@@ -20,10 +20,6 @@ class CrystalScript::ExpressionGen
         }
       }
       DEF
-      str << "try {"
-
-      str << "} catch(err) {
-      }"
     end
   end
 
@@ -187,13 +183,6 @@ class CrystalScript::ExpressionGen
         }
       })()
       IF
-      # <<-IF
-      # (#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}(#{generate node.cond})) ? (
-      # #{generate(node.then)}
-      # ) : (
-      # #{generate(node.else)}
-      # )
-      # IF
     end
   end
 
