@@ -18,6 +18,7 @@ class CrystalScript
             }
           }
         end
+        define_class_methods(named_type)
       else
         @output << "// Not implemented: " << named_type << " : " << named_type.class << "\n"
       end

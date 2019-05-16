@@ -10,6 +10,7 @@ class CrystalScript
   NULL_CLASS = "$NullClass"
   TRUTHY = "$truthy"
   IS_A = "$is_a"
+  SIMPLE_LITERAL = "$literal"
 
   getter program : Program
   getter node : ASTNode
@@ -30,19 +31,20 @@ class CrystalScript
     init_named_types
     set_instance
     apply_include
-    define_instance_methods
     apply_extend
-    define_class_methods
 
     @output << Crustache.render Templates::INIT_LITERALS, nil
+
+    @output << "\n#{CrystalScript::GLOBAL_CLASS}['main']['main()']();"
   end
 
-  def self.compile(sources, output)
+  def self.compile(source : Crystal::Compiler::Source, output)
     compiler = Crystal::Compiler.new
     compiler.no_codegen = true
     compiler.no_cleanup = false
     compiler.prelude = "crs_prelude"
-    result = compiler.compile(sources, "")
+    source = Crystal::Compiler::Source.new source.filename, (source.code + "\n main")
+    result = compiler.compile(source, "")
     CrystalScript.new(result.program, result.node, output).generate
   rescue ex
     CrystalScript.logger.fatal ex
@@ -65,30 +67,35 @@ class CrystalScript
 end
 
 source = Crystal::Compiler::Source.new "source_filename.cr", <<-PROGRAM
-class Test
-  def method
-    from_inside
-  end
-
-  def from_inside
-    puts "inside"
-  end
-
-  def self.class_method
-    class_from_inside
-  end
-
-  def self.class_from_inside
-    puts "class inside"
+class ClassName
+  def method_name
+    puts 3
   end
 end
 
-def run
-  Test.new.method
-  Test.class_method
+def method(x)
+  case x
+  when Int32
+    puts "number"
+  when String
+    puts "string"
+  end
 end
 
-run
+def while_loop
+  i = 0
+  while i < 10
+    i += 1
+    puts i
+  end
+end
+
+def main
+  ClassName.new.method_name
+  while_loop
+  method 1
+  method "one"
+end
 
 PROGRAM
 

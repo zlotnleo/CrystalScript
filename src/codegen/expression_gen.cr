@@ -2,14 +2,18 @@ class CrystalScript::ExpressionGen
   class UnsafeMethodError < Exception
   end
 
-  @local_vars = ["self"] of String
-  @in_conditional = false
-
-  def initialize
+  def initialize()
   end
 
-  def initialize(func_args : Array(String)?)
-    @local_vars += func_args unless func_args.nil?
+  # Only generates the method body
+  def generate(node : Def)
+    String.build do |str|
+      local_vars = node.vars.try &.select { |name, meta_var| meta_var.assigned_to? }.map(&.[](0))
+      unless local_vars.nil? || local_vars.empty?
+        str << "let " << local_vars.join(",") << ";\n"
+      end
+      str << "return " << generate(node.body) << ";"
+    end
   end
 
   def generate(node : Nop)
@@ -17,42 +21,50 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Expressions)
+    CrystalScript.logger.info node.expressions
     if node.expressions.empty?
       return ""
     end
     String.build do |str|
       node.expressions[0...-1].each do |e|
-        str << generate(e) << ";\n"
+        code = generate(e)
+        str << code << ",\n" unless code.as(String).blank?
       end
-      str << generate(node.expressions[-1]) << "\n"
+      code = generate(node.expressions[-1])
+      str << code << "\n" unless code.as(String).blank?
     end
   end
 
+  def generate(node : While)
+    Crustache.render Templates::WHILE, {
+      "Condition" => generate(node.cond),
+      "Body" => generate(node.body)
+    }
+  end
+
   def generate(node : Call)
+    if (body = node.target_def.body).is_a? Primitive
+      if (obj = node.obj).nil?
+        args = node.args
+      else
+        args = node.args.dup.unshift obj
+      end
+      return PrimitiveGen.codegen_primitive(body, node.target_def, args)
+    end
     owner = node.target_def.owner
     unless (obj=node.obj).nil?
-      if !owner.is_a? MetaclassType && !owner.is_a? VirtualMetaclassType && !owner.is_a? GenericModuleInstanceMetaclassType && !owner.is_a? GenericClassInstanceMetaclassType
-        return Crustache.render Templates::CALL_ON_OBJ, {
-          "Object" => generate(obj),
-          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
-          "args" => node.args.map { |arg|
-            { "Arg" => generate(arg) }
-          },
-        }
-      else
-        return Crustache.render Templates::CALL, {
-          "Object" => generate(obj),
-          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
-          "args" => node.args.map { |arg|
-            { "Arg" => generate(arg) }
-          },
-        }
-      end
+      return Crustache.render Templates::CALL, {
+        "Object" => generate(obj),
+        "MethodName" => CrystalScript.get_method(nil, node.target_def, is_instance: nil),
+        "args" => node.args.map { |arg|
+          { "Arg" => generate(arg) }
+        },
+      }
     else
       if owner == node.scope? && !owner.is_a? MetaclassType && !owner.is_a? VirtualMetaclassType && !owner.is_a? GenericModuleInstanceMetaclassType && !owner.is_a? GenericClassInstanceMetaclassType
-        return Crustache.render Templates::CALL_ON_OBJ, {
+        return Crustache.render Templates::CALL, {
           "Object" => "this",
-          "MethodName" => CrystalScript.get_method(nil, node.target_def, include_args: true, is_instance: nil),
+          "MethodName" => CrystalScript.get_method(nil, node.target_def, is_instance: nil),
           "args" => node.args.map { |arg|
             { "Arg" => generate(arg) }
           },
@@ -60,7 +72,7 @@ class CrystalScript::ExpressionGen
       else
         return Crustache.render Templates::CALL, {
           "Object" => "",
-          "MethodName" => CrystalScript.get_method(owner, node.target_def, include_args: true, is_instance: nil),
+          "MethodName" => CrystalScript.get_method(owner, node.target_def, is_instance: nil),
           "args" => node.args.map { |arg|
             { "Arg" => generate(arg) }
           },
@@ -85,17 +97,12 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : Var)
-    if (@local_vars.find &.== node.name).nil?
-      @local_vars << node.name
-      return (@in_conditional ? "" : "let ") + node.name
-    end
     node.name
   end
 
   def generate(node : UninitializedVar)
-    "/* uninitialised variable! */"
     CrystalScript.logger.warn "Uninitialised variable declaration: #{node} in #{node.location}"
-    # raise UnsafeMethodError.new("Uninitialised variable declaration: #{node} in #{node.location}")
+    "/* uninitialised variable! */"
   end
 
   def generate(node : NilLiteral)
@@ -135,38 +142,27 @@ class CrystalScript::ExpressionGen
   end
 
   def generate(node : If)
-    cvv = ConditionalVarVisitor.new
-    cvv.accept(node.cond)
-    declare = cvv.vars.empty? ? "" : String.build do |str|
-      str << "let "
-      cvv.vars[0...-1].each do |var|
-        str << var << ", "
+    if node.truthy?
+      if (exp = node.then).is_a? Expressions
+        exp.expressions.unshift(node.cond)
+      else
+        generate(Expressions.new [node.cond, node.then])
       end
-      str << cvv.vars[-1] << ";\n"
-    end
-
-    @in_conditional = true
-
-    if node.ternary?
-      result = declare + <<-IF
+    elsif node.falsey?
+      if (exp = node.else).is_a? Expressions
+        exp.expressions.unshift(node.cond)
+      else
+        generate(Expressions.new [node.cond, node.else])
+      end
+    else
+      <<-IF
       (#{generate(node.cond)}) ? (
       #{generate(node.then)}
       ) : (
       #{generate(node.else)}
       )
       IF
-    else
-      result = declare + <<-IF
-      if (#{generate(node.cond)}) {
-      #{generate(node.then)}
-      } else {
-      #{generate(node.else)}
-      }
-      IF
     end
-
-    @in_conditional = false
-    return result
   end
 
   def generate(node : Generic)
@@ -204,19 +200,12 @@ class CrystalScript::ExpressionGen
     return "undefined /* #{node.class} (ExpandableNode) */"
   end
 
+  def generate(node : Primitive)
+    CrystalScript.logger.warn "Unexpected Primitive #{node.name}"
+  end
+
   def generate(node : ASTNode)
     CrystalScript.logger.warn("Unimplemented ASTNode #{node.class}")
     "undefined /* #{node.class} #{node} */"
-  end
-
-  private class ConditionalVarVisitor < Crystal::Visitor
-    getter vars = [] of String
-    def visit(node : Var)
-      @vars << node.name if @vars.find &.==(node.name).nil?
-    end
-    def visit(node : ASTNode)
-      node.accept_children(self)
-    end
-
   end
 end

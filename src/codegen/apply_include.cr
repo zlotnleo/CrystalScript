@@ -21,6 +21,7 @@ class CrystalScript
           }
           @output << Crustache.render Templates::APPLY_INCLUDE, model
         end
+        define_instance_methods(named_type)
       else
         @output << "// Not implemented: " << named_type << " : " << named_type.class << "\n"
       end

@@ -18,7 +18,8 @@ class CrystalScript
             "DisplayName" => names.join("::"),
             "has_superclass" => superclass_names.nil? ? false : {
               "super_path" => superclass_names.map { |name| {"Type" => name} }
-            }
+            },
+            "has_class_vars" => named_type.is_a? ClassVarContainer
           }
           @output << Crustache.render Templates::TYPE_DECLARATION, model
         end

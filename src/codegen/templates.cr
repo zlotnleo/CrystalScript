@@ -5,6 +5,8 @@ module CrystalScript::Templates
   const #{CrystalScript::GLOBAL_CLASS} = Object.create(null);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY} = v => !(v === #{CrystalScript::GLOBAL_CLASS}.nil || v === #{CrystalScript::GLOBAL_CLASS}.false);
   #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::IS_A} = (obj, type) => obj instanceof type ? #{CrystalScript::GLOBAL_CLASS}.true : #{CrystalScript::GLOBAL_CLASS}.false;
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::SIMPLE_LITERAL} = (type, v) => { let _ = new type; _.$value = v; return _; };
+
   INIT_CRYSTALSCRIPT
 
   INIT_LITERALS = Crustache.parse <<-INIT_LITERALS
@@ -25,6 +27,7 @@ module CrystalScript::Templates
   TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
   #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}} = class{{#has_superclass}} extends #{CrystalScript::GLOBAL_CLASS}{{#super_path}}['{{{Type}}}']{{/super_path}}{{/has_superclass}} {};
   Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
+  {{#has_class_vars}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.$class_vars = Object.create(null);{{/has_class_vars}}
 
   TYPE_DECLARATION
 
@@ -45,7 +48,7 @@ module CrystalScript::Templates
   APPLY_INCLUDE
 
   APPLY_EXTEND = Crustache.parse <<-APPLY_EXTEND
-  Object.assign(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#extended_modules}}, #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/extended_modules}})
+  Object.assign(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#extended_modules}}, #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype{{/extended_modules}});
 
   APPLY_EXTEND
 
@@ -65,13 +68,8 @@ module CrystalScript::Templates
   CLASS
 
   METHOD = Crustache.parse <<-METHOD
-  {{#class}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#instance_method}}.prototype{{/instance_method}}{{/class}}['{{{MethodName}}}']{{#include_args}}['{{#arg_types}}{{{Type}}},{{/arg_types}}']{{/include_args}}
+  {{#class}}#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}{{#instance_method}}.prototype{{/instance_method}}{{/class}}['{{{MethodName}}}({{#arg_types}}{{{Type}}},{{/arg_types}})']
   METHOD
-
-  INIT_METHOD = Crustache.parse <<-INIT_METHOD
-  {{{MethodName}}} = Object.create(null);
-
-  INIT_METHOD
 
   DEFINE_METHOD = Crustache.parse <<-DEFINE_METHOD
   {{{MethodName}}} = function({{#args}}{{{Arg}}},{{/args}}) {
@@ -87,12 +85,8 @@ module CrystalScript::Templates
 
   ALLOCATE
 
-  CALL_ON_OBJ = Crustache.parse <<-CALL_ON_OBJ
-  ($obj => $obj{{{MethodName}}}.call($obj{{#args}},({{{Arg}}}){{/args}}))({{{Object}}})
-  CALL_ON_OBJ
-
   CALL = Crustache.parse <<-CALL
-  {{{Object}}}{{{MethodName}}}({{#args}}({{{Arg}}}),{{/args}})
+  {{{Object}}}{{{MethodName}}}({{#args}}{{{Arg}}}{{/args}})
   CALL
 
   TUPLE_LITERAL = Crustache.parse <<-TUPLE_LITERAL
@@ -104,10 +98,15 @@ module CrystalScript::Templates
   TUPLE_LITERAL
 
   SIMPLE_LITERAL = Crustache.parse <<-SIMPLE_LITERAL
-  (() => {
-    let _ = new #{CrystalScript::GLOBAL_CLASS}['{{{Type}}}'];
-    _.$value = {{{Value}}};
-    return _;
-  })()
+  #{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::SIMPLE_LITERAL}(#{CrystalScript::GLOBAL_CLASS}['{{{Type}}}'], {{{Value}}})
   SIMPLE_LITERAL
+
+  WHILE = Crustache.parse <<-WHILE
+  (() => {
+    while(#{CrystalScript::GLOBAL_CLASS}.#{CrystalScript::TRUTHY}({{{Condition}}})){
+    {{{Body}}}
+    }
+    return #{CrystalScript::GLOBAL_CLASS}.nil
+  })()
+  WHILE
 end
