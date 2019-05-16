@@ -25,8 +25,19 @@ module CrystalScript::Templates
 
   OBJECT_TYPE_DECLARATION
 
+  INSTANCE_VAR_INIT = Crustache.parse <<-INSTANCE_VAR_INIT
+
+    constructor() {
+      super();
+      {{#instance_vars}}
+      this.$instance_vars['{{{Name}}}'] = {{{Value}}};
+      {{/instance_vars}}
+    }
+
+  INSTANCE_VAR_INIT
+
   TYPE_DECLARATION = Crustache.parse <<-TYPE_DECLARATION
-  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}} = class{{#has_superclass}} extends #{CrystalScript::GLOBAL_CLASS}{{#super_path}}['{{{Type}}}']{{/super_path}}{{/has_superclass}} {};
+  #{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}} = class{{#has_superclass}} extends #{CrystalScript::GLOBAL_CLASS}{{#super_path}}['{{{Type}}}']{{/super_path}}{{/has_superclass}} { {{{instance_var_init}}} };
   Object.defineProperty(#{CrystalScript::GLOBAL_CLASS}{{#path}}['{{{Type}}}']{{/path}}.prototype.constructor, 'name', {value: '{{{DisplayName}}}'});
 
   TYPE_DECLARATION

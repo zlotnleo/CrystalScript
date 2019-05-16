@@ -18,6 +18,26 @@ class CrystalScript
             "has_superclass" => superclass_names.nil? ? false : {
               "super_path" => superclass_names.map { |name| {"Type" => name} }
             },
+            "instance_var_init" => if named_type.is_a? InstanceVarInitializerContainer && named_type.is_a? InstanceVarContainer
+              Crustache.render Templates::INSTANCE_VAR_INIT, {
+                "instance_vars" => named_type.instance_vars.keys.map { |name|
+                  if named_type.has_instance_var_initializer? name
+                    var = named_type.get_instance_var_initializer(name).not_nil!
+                    {
+                      "Name" => name,
+                      "Value" => ExpressionGen.new.generate(var.value)
+                    }
+                  else
+                    {
+                      "Name" => name,
+                      "Value" => "#{CrystalScript::GLOBAL_CLASS}.nil"
+                    }
+                  end
+                }
+              }
+            else
+              nil
+            end
           }
           if named_type.is_a? ClassVarContainer
             @output << Crustache.render Templates::CLASS_VARS, {
