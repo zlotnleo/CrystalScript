@@ -26,12 +26,11 @@ class CrystalScript::ExpressionGen
       return ""
     end
     String.build do |str|
-      node.expressions[0...-1].each do |e|
+      str << generate(node.expressions[0])
+      node.expressions[1..-1].each do |e|
         code = generate(e)
-        str << code << ",\n" unless code.as(String).blank?
+        str << ",\n" << code unless code.is_a? String && code.blank?
       end
-      code = generate(node.expressions[-1])
-      str << code << "\n" unless code.as(String).blank?
     end
   end
 
