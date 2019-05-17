@@ -110,7 +110,7 @@ module CrystalScript::Templates
   TUPLE_LITERAL = Crustache.parse <<-TUPLE_LITERAL
   (() => {
     let _ = new #{CrystalScript::GLOBAL_CLASS}['Tuple({{#type_args}}{{{Type}}}{{^last}},{{/last}}{{/type_args}})'];
-    _.$value = [{{#values}}{{Value}},{{/values}}];
+    _.$value = [{{#values}}{{{Value}}},{{/values}}];
     return _;
   })()
   TUPLE_LITERAL

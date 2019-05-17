@@ -9,6 +9,8 @@ module CrystalScript::PrimitiveGen
       codegen_primitive_io node, target_def, call_args
     when "allocate"
       codegen_primitive_allocate node, target_def, call_args
+    when "tuple_indexer_known_index"
+      codegen_tuple_index node, target_def, call_args
     else
       CrystalScript.logger.error "Unhandled primitive in codegen #{node.name}"
       ""
@@ -51,5 +53,9 @@ module CrystalScript::PrimitiveGen
     type = target_def.owner.instance_type
     name = CrystalScript.to_str_path(type).map { |t| "['#{t}']" }.join("")
     "new #{CrystalScript::GLOBAL_CLASS}#{name}()"
+  end
+
+  def codegen_tuple_index(node, target_def, call_args)
+    "#{call_args[0]}.$value[#{call_args[1]}]"
   end
 end
